@@ -50,7 +50,7 @@ func initOption() pubsub.ConnectOptions {
 
 	if broker == nil || *broker == "" || *broker == "tcp://{host}:{port}" {
 		fmt.Println("Use Default Broker= tcp://10.0.0.4:1883")
-		*broker = "tcp://10.0.0.10:1883"
+		*broker = "tcp://10.0.0.4:1883"
 	}
 
 	options := pubsub.ConnectOptions{}
