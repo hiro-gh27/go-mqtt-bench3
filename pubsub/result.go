@@ -22,6 +22,7 @@ type PublishResult struct {
 	DurTime   time.Duration // =[endtime - starttime]
 	Topic     string        // = MessageID(basetopic/clientID/tiralNum)
 	ClientID  string        //
+	MessageID string
 	Message   string
 }
 
@@ -29,6 +30,6 @@ type PublishResult struct {
 type SubscribeResult struct {
 	SubscribeTime time.Time //
 	Topic         string    //
-	ClientID      string    //
+	ClientID      int       // 大して意味ない気がする, チェック用になるかな
 	MessageID     string    //
 }

@@ -37,7 +37,10 @@ func RandomInterval(max int) time.Duration {
 }
 
 // RandomMessage is
-func RandomMessage(strlen int) string {
+func RandomMessage(strlen int) (string, string) {
+	nanoStamp := time.Now().Format(time.StampNano)
+	strlen = strlen - len(nanoStamp)
+
 	message := make([]byte, strlen)
 	cache, remain := rand.Int63(), letterIdxMax
 	for i := strlen - 1; i >= 0; {
@@ -52,7 +55,8 @@ func RandomMessage(strlen int) string {
 		cache >>= letterIdxBits
 		remain--
 	}
-	return string(message)
+	str := fmt.Sprintf("%s%s", nanoStamp, string(message))
+	return nanoStamp, str
 
 }
 
