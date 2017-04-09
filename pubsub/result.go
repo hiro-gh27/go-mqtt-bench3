@@ -27,6 +27,8 @@ type PublishResult struct {
 
 // SubscribeResult is
 type SubscribeResult struct {
-	timestamp time.Time //
-	MessageID string    //
+	SubscribeTime time.Time //
+	Topic         string    //
+	ClientID      string    //
+	MessageID     string    //
 }

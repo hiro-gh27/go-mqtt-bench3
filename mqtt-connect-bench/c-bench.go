@@ -9,7 +9,7 @@ import (
 	"time"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
-	pubsub "github.com/hiro-gh27/go-mqtt-bench2/pubsub"
+	pubsub "github.com/hiro-gh27/go-mqtt-bench3/pubsub"
 )
 
 var asyncFlag bool

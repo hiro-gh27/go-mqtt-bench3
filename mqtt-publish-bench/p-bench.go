@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"time"
 
-	pubsub "github.com/hiro-gh27/go-mqtt-bench2/pubsub"
+	pubsub "github.com/hiro-gh27/go-mqtt-bench3/pubsub"
 )
 
 const base = "go-mqtt-bench/"
@@ -32,7 +32,7 @@ func main() {
 	// export elasticseaech
 }
 
-func initOption() pubsub.PublishOptions2 {
+func initOption() pubsub.PublishOptions {
 	// for connect
 	broker := flag.String("broker", "tcp://{host}:{port}", "URI of MQTT broker (required)")
 	clients := flag.Int("clients", 10, "Number of clients")
@@ -60,7 +60,7 @@ func initOption() pubsub.PublishOptions2 {
 	// make clients
 	connectedClients := pubsub.NomalConnect(*broker, *clients)
 
-	var options pubsub.PublishOptions2
+	var options pubsub.PublishOptions
 	options.Qos = byte(*qos)
 	options.Retain = *retain
 	options.Topic = *topic

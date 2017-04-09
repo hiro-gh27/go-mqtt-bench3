@@ -18,7 +18,7 @@ var baseTopic string
 var trial int
 var count int
 
-func initPubOpts(opts PublishOptions2) {
+func initPubOpts(opts PublishOptions) {
 	baseTopic = opts.Topic
 	count = opts.Count
 	messageSize = opts.MessageSize
@@ -35,7 +35,10 @@ func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 	clientID := fmt.Sprintf("%s-%d", pid, id)
 	topic := fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, trialNum)
 	startTime := time.Now()
-	token := clinet.Publish(topic, qos, false, message)
+	token, MessageID := clinet.Publish2(topic, qos, false, message)
+
+	fmt.Printf("MessageID: %d", MessageID)
+
 	token.Wait()
 	endTime := time.Now()
 
@@ -50,7 +53,7 @@ func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 }
 
 // SyncPublish is
-func SyncPublish(opts PublishOptions2) {
+func SyncPublish(opts PublishOptions) {
 	initPubOpts(opts)
 	var pResults []PublishResult
 	for index := 0; index < opts.Count; index++ {
@@ -113,7 +116,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 }
 
 // AsyncPublish is
-func AsyncPublish(opts PublishOptions2) {
+func AsyncPublish(opts PublishOptions) {
 	initPubOpts(opts)
 	var pResults []PublishResult
 	wg := &sync.WaitGroup{}
