@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
@@ -11,6 +12,7 @@ import (
 
 var subscribeQos byte
 var subscribeBaseTopic string
+var subscribePid string
 
 func subscribe(client MQTT.Client, id int, ch chan SubscribeResult) {
 	//topic := fmt.Sprintf(subscribeBaseTopic+"%s"+"/"+"#", id)
@@ -20,7 +22,7 @@ func subscribe(client MQTT.Client, id int, ch chan SubscribeResult) {
 
 		var sResult SubscribeResult
 		sResult.SubscribeTime = subscribeTime
-		sResult.ClientID = id
+		sResult.ClientID = fmt.Sprintf("%s-%d", subscribePid, id)
 		sResult.Topic = msg.Topic()
 		sResult.MessageID = string(msg.Payload()[:25])
 		ch <- sResult
@@ -43,6 +45,7 @@ func Subscribe(opts SubscribeOptions) []SubscribeResult {
 	//wg.Add(1)
 	subscribeQos = opts.Qos
 	subscribeBaseTopic = opts.Topic
+	subscribePid = strconv.FormatInt(int64(os.Getpid()), 16)
 	for id := 0; id < opts.ClientNum; id++ {
 		client := opts.Clients[id]
 		subscribe(client, id, sResultChan)
@@ -52,9 +55,8 @@ func Subscribe(opts SubscribeOptions) []SubscribeResult {
 	signal.Notify(signalchan, os.Interrupt)
 
 	go func() {
-		fmt.Println("exit: ctrl + c")
+		fmt.Printf("subscribePid=%s, exit->ctrl + c\n", subscribePid)
 		for {
-
 			//sResult :=
 			/*
 				fmt.Printf("subTime=%s, topic=%s, ClienID=%d, MessageID=%s",

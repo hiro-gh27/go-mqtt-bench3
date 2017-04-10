@@ -37,7 +37,7 @@ func RandomInterval(max int) time.Duration {
 }
 
 // RandomMessage is
-func RandomMessage(strlen int) (string, string) {
+func getMessageAndID(strlen int) (string, string) {
 	nanoStamp := time.Now().Format(time.StampNano)
 	strlen = strlen - len(nanoStamp)
 
@@ -57,7 +57,30 @@ func RandomMessage(strlen int) (string, string) {
 	}
 	str := fmt.Sprintf("%s%s", nanoStamp, string(message))
 	return nanoStamp, str
+}
 
+func getMessage(strlen int) string {
+	strlen = strlen - 25 // 25= len(time.nanostamp)
+	if strlen < 0 {
+		strlen = 1
+	}
+
+	message := make([]byte, strlen)
+	cache, remain := rand.Int63(), letterIdxMax
+	for i := strlen - 1; i >= 0; {
+		if remain == 0 {
+			cache, remain = rand.Int63(), letterIdxMax
+		}
+		idx := int(cache & letterIdxMask)
+		if idx < len(letters) {
+			message[i] = letters[idx]
+			i--
+		}
+		cache >>= letterIdxBits
+		remain--
+	}
+	//str := fmt.Sprintf("%s%s", nanoStamp, string(message))
+	return string(message)
 }
 
 // DumpConnectResults is

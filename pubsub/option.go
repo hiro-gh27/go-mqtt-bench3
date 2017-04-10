@@ -4,6 +4,9 @@ import (
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
+// Base is mean topic
+const Base = "go-mqtt-bench/"
+
 // ExecOptions is
 type ExecOptions struct {
 	Broker      string // Broker URI
@@ -51,6 +54,15 @@ type SubscribeOptions struct {
 	Topic     string        // Topicのルート
 	ClientNum int           // クライアントの同時実行数
 	Clients   []MQTT.Client //クライアントをスライスで確保!!
+}
+
+// RttOption is
+type RttOption struct {
+	Qos         byte
+	Retain      bool   // Retain
+	Topic       string // Topicのルート
+	MessageSize int    // 1メッセージのサイズ(byte)
+	MaxInterval int    // メッセージ毎の実行間隔時間(ms)
 }
 
 // LoadOptions is

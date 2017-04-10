@@ -30,6 +30,7 @@ type PublishResult struct {
 type SubscribeResult struct {
 	SubscribeTime time.Time //
 	Topic         string    //
-	ClientID      int       // 大して意味ない気がする, チェック用になるかな
+	ClientID      string    // 大して意味ない気がする, チェック用になるかな
 	MessageID     string    //
+	PublisherID   string    // 作ろうと思ったけど, 毎回長さが変わる可能性あるからやめた.
 }

@@ -13,7 +13,7 @@ import (
 var messageSize int
 var maxIntarval int
 var qos byte
-var pid string
+var publishPid string
 var baseTopic string
 var trial int
 var count int
@@ -22,7 +22,7 @@ func initPubOpts(opts PublishOptions) {
 	baseTopic = opts.Topic
 	count = opts.Count
 	messageSize = opts.MessageSize
-	pid = strconv.FormatInt(int64(os.Getpid()), 16)
+	publishPid = strconv.FormatInt(int64(os.Getpid()), 16)
 	maxIntarval = maxInterval
 	trial = opts.TrialNum
 	qos = opts.Qos
@@ -31,20 +31,24 @@ func initPubOpts(opts PublishOptions) {
 // "sync publish"
 func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 	var pResult PublishResult
-	clientID := fmt.Sprintf("%s-%d", pid, id)
+	clientID := fmt.Sprintf("%s-%d", publishPid, id)
 	//messageID := fmt.Sprintf("%s-%d-%d", pid, id, trialNum)
 	//fmt.Printf("messageID=%s byte=%d", messageID, len(messageID))
 
 	//messageID := time.Now().Format(time.StampNano)
 	//fmt.Printf("messageID=%s, len=%d", messageID, len(messageID))
-	messageID, message := RandomMessage(messageSize) //1 is "/"
+	//messageID, message := getMessageAndID(messageSize)
 	//message = fmt.Sprintf("%s/%s", messageID, message)
+	message := getMessage(messageSize)
 	fmt.Printf("message=%s, size=%d", message, len(message))
 	//topic := fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, trialNum)
 	topic := fmt.Sprintf(baseTopic+"%d", id)
 
 	startTime := time.Now()
-	startTime.MarshalText()
+	messageID := startTime.Format(time.StampNano)
+	message = messageID + message
+	//message = append(MessageID..., message...)
+	//startTime.MarshalText()
 	token := clinet.Publish(topic, qos, false, message)
 	token.Wait()
 	endTime := time.Now()
@@ -77,8 +81,8 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 	var pResults []PublishResult
 	var waitTime time.Duration
 
-	messageID, message := RandomMessage(messageSize)
-	clientID := fmt.Sprintf("%s-%d", pid, id)
+	messageID, message := getMessageAndID(messageSize)
+	clientID := fmt.Sprintf("%s-%d", publishPid, id)
 	//topic := fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, 0)
 	topic := fmt.Sprintf(baseTopic+"%d", id)
 	if maxIntarval > 0 {
@@ -103,7 +107,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 	pResults = append(pResults, vals)
 
 	for index := 1; index < count; index++ {
-		messageID, message = RandomMessage(messageSize)
+		messageID, message = getMessageAndID(messageSize)
 		//topic = fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, index)
 		topic := fmt.Sprintf(baseTopic+"%d", id)
 		if maxIntarval > 0 {
