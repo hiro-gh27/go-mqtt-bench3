@@ -54,8 +54,8 @@ func initOption() pubsub.PublishOptions {
 		os.Exit(0)
 	}
 	if broker == nil || *broker == "" || *broker == "tcp://{host}:{port}" {
-		fmt.Println("Use Default Broker= tcp://10.0.0.10:1883")
-		*broker = "tcp://10.0.0.10:1883"
+		fmt.Println("Use Default Broker= tcp://10.0.0.4:1883")
+		*broker = "tcp://10.0.0.4:1883"
 	}
 	// make clients
 	connectedClients := pubsub.NomalConnect(*broker, *clients)

@@ -40,7 +40,8 @@ func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 	messageID, message := RandomMessage(messageSize) //1 is "/"
 	//message = fmt.Sprintf("%s/%s", messageID, message)
 	fmt.Printf("message=%s, size=%d", message, len(message))
-	topic := fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, trialNum)
+	//topic := fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, trialNum)
+	topic := fmt.Sprintf(baseTopic+"%d", id)
 
 	startTime := time.Now()
 	startTime.MarshalText()
