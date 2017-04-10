@@ -53,6 +53,7 @@ func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 	token.Wait()
 	endTime := time.Now()
 
+	fmt.Printf("message=%s, size=%d", message, len(message))
 	pResult.StartTime = startTime
 	pResult.EndTime = endTime
 	pResult.DurTime = endTime.Sub(startTime)
