@@ -79,7 +79,8 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 
 	messageID, message := RandomMessage(messageSize)
 	clientID := fmt.Sprintf("%s-%d", pid, id)
-	topic := fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, 0)
+	//topic := fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, 0)
+	topic := fmt.Sprintf(baseTopic+"%d", id)
 	if maxIntarval > 0 {
 		waitTime = RandomInterval(maxIntarval)
 	}
@@ -103,7 +104,8 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 
 	for index := 1; index < count; index++ {
 		messageID, message = RandomMessage(messageSize)
-		topic = fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, index)
+		//topic = fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, index)
+		topic := fmt.Sprintf(baseTopic+"%d", id)
 		if maxIntarval > 0 {
 			waitTime = RandomInterval(maxIntarval)
 			time.Sleep(waitTime)
