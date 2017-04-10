@@ -19,11 +19,11 @@ type ConnectResult struct {
 type PublishResult struct {
 	StartTime time.Time     // when trial for connect start
 	EndTime   time.Time     // when trial for connect end
-	DurTime   time.Duration // =[endtime - starttime]
-	Topic     string        // = MessageID(basetopic/clientID/tiralNum)
-	ClientID  string        //
-	MessageID string
-	Message   string
+	DurTime   time.Duration // = endtime - starttime
+	Topic     string        // = basetopic/id
+	ClientID  string        // = pid + id(index)
+	MessageID string        // = time.Stamp()
+	Message   string        // RandomMessage
 }
 
 // SubscribeResult is

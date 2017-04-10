@@ -22,8 +22,11 @@ func main() {
 
 	opts := initOption()
 
-	pubsub.Subscribe(opts)
-
+	sRestults := pubsub.Subscribe(opts)
+	for _, sResult := range sRestults {
+		fmt.Printf("subTime=%s, topic=%s, ClienID=%d, MessageID=%s\n",
+			sResult.SubscribeTime, sResult.Topic, sResult.ClientID, sResult.MessageID)
+	}
 	/*
 		export
 	*/

@@ -2,7 +2,8 @@ package pubsub
 
 import (
 	"fmt"
-
+	"os"
+	"os/signal"
 	"time"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
@@ -46,20 +47,27 @@ func Subscribe(opts SubscribeOptions) []SubscribeResult {
 		client := opts.Clients[id]
 		subscribe(client, id, sResultChan)
 	}
-	//wg.Wait()
-	/*
-		go func() {
-			for {
-				close(ch)
-			}
-		}()
-	*/
-	for {
-		fmt.Println("let's publish!!")
-		sResult := <-sResultChan
-		fmt.Printf("subTime=%s, topic=%s, ClienID=%d, MessageID=%s",
-			sResult.SubscribeTime, sResult.Topic, sResult.ClientID, sResult.MessageID)
-		sResults = append(sResults, sResult)
-	}
-	//return sResults
+
+	signalchan := make(chan os.Signal, 1)
+	signal.Notify(signalchan, os.Interrupt)
+
+	go func() {
+		fmt.Println("exit: ctrl + c")
+		for {
+
+			//sResult :=
+			/*
+				fmt.Printf("subTime=%s, topic=%s, ClienID=%d, MessageID=%s",
+					sResult.SubscribeTime, sResult.Topic, sResult.ClientID, sResult.MessageID)
+			*/
+			sResults = append(sResults, <-sResultChan)
+			//fmt.Println("subscribe and add informastion")
+		}
+	}()
+
+	<-signalchan
+	fmt.Println("get signal!!")
+	//runtime.Goexit()
+	close(sResultChan)
+	return sResults
 }
