@@ -31,9 +31,9 @@ func iscompleat(results []ConnectResult) ([]MQTT.Client, bool) {
  * #### SyncMode ####
  */
 func syncconnect(id int, broker string) ConnectResult {
-	var cRresult ConnectResult
 	prosessID := strconv.FormatInt(int64(os.Getpid()), 16)
-	clientID := fmt.Sprintf("%s-%d", prosessID, id)
+	sid := fmt.Sprintf("%05d", id)
+	clientID := fmt.Sprintf("%s-%s", prosessID, sid)
 	opts := MQTT.NewClientOptions()
 	opts.AddBroker(broker)
 	opts.SetClientID(clientID)
@@ -41,22 +41,31 @@ func syncconnect(id int, broker string) ConnectResult {
 
 	startTime := time.Now()
 	token := client.Connect()
+	waitStartTime := time.Now()
 	if token.Wait() && token.Error() != nil {
 		fmt.Printf("Connected error: %s\n", token.Error())
 		client = nil
 	}
-	endTime := time.Now()
+	waitEndTime := time.Now()
 
+	var cRresult ConnectResult
 	cRresult.StartTime = startTime
-	cRresult.EndTime = endTime
-	cRresult.DurTime = endTime.Sub(startTime)
+	cRresult.WaitStartTime = waitStartTime
+	cRresult.EndTime = waitEndTime
+	cRresult.LeadDuration = waitStartTime.Sub(startTime)
+	cRresult.WaitDuration = waitEndTime.Sub(waitStartTime)
+	cRresult.TotalDuration = waitEndTime.Sub(startTime)
 	cRresult.Client = client
 	cRresult.ClientID = clientID
+
+	fmt.Printf("ClientId=%s,Lead=%s, wait=%s, total=%s\n",
+		cRresult.ClientID, cRresult.LeadDuration, cRresult.WaitDuration, cRresult.TotalDuration)
+
 	return cRresult
 }
 
 // SyncConnect is
-func SyncConnect(execOpts ConnectOptions) []MQTT.Client {
+func SyncConnect(execOpts ConnectOptions) ([]ConnectResult, []MQTT.Client) {
 	var cResults []ConnectResult
 	broker := execOpts.Broker
 	for id := 0; id < execOpts.ClientNum; id++ {
@@ -69,16 +78,15 @@ func SyncConnect(execOpts ConnectOptions) []MQTT.Client {
 		os.Exit(0)
 	}
 	time.Sleep(3000 * time.Millisecond)
-	DumpConnectResults(cResults)
-	return clients
+	//DumpConnectResults(cResults)
+	return cResults, clients
 }
 
 /**
  * ### AsyncMode ###
  */
 func asynconnect(id int, broker string, freeze *sync.WaitGroup) ConnectResult {
-	var cRresult ConnectResult
-	var waitTime time.Duration
+	var intervalTime time.Duration
 
 	prosessID := strconv.FormatInt(int64(os.Getpid()), 16)
 	clientID := fmt.Sprintf("%s-%d", prosessID, id)
@@ -88,31 +96,36 @@ func asynconnect(id int, broker string, freeze *sync.WaitGroup) ConnectResult {
 	client := MQTT.NewClient(opts)
 
 	if maxInterval > 0 {
-		waitTime = RandomInterval(maxInterval)
+		intervalTime = RandomInterval(maxInterval)
 	}
 	freeze.Wait()
-	if waitTime > 0 {
-		time.Sleep(waitTime)
+	if intervalTime > 0 {
+		time.Sleep(intervalTime)
 	}
 
 	startTime := time.Now()
 	token := client.Connect()
+	waitStartTime := time.Now()
 	if token.Wait() && token.Error() != nil {
 		fmt.Printf("Connected error: %s\n", token.Error())
 		client = nil
 	}
 	endTime := time.Now()
 
+	var cRresult ConnectResult
 	cRresult.StartTime = startTime
+	cRresult.WaitStartTime = waitStartTime
 	cRresult.EndTime = endTime
-	cRresult.DurTime = endTime.Sub(startTime)
+	cRresult.LeadDuration = waitStartTime.Sub(startTime)
+	cRresult.WaitDuration = endTime.Sub(waitStartTime)
+	cRresult.TotalDuration = endTime.Sub(startTime)
 	cRresult.Client = client
 	cRresult.ClientID = clientID
 	return cRresult
 }
 
 // AsyncConnect is
-func AsyncConnect(execOpts ConnectOptions) []MQTT.Client {
+func AsyncConnect(execOpts ConnectOptions) ([]ConnectResult, []MQTT.Client) {
 	var cResults []ConnectResult
 	maxInterval = execOpts.MaxInterval
 	wg := &sync.WaitGroup{}
@@ -137,9 +150,8 @@ func AsyncConnect(execOpts ConnectOptions) []MQTT.Client {
 		SyncDisconnect(clients)
 		os.Exit(0)
 	}
-	DumpConnectResults(cResults)
-
-	return clients
+	//DumpConnectResults(cResults)
+	return cResults, clients
 }
 
 // SyncDisconnect is

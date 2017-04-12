@@ -31,7 +31,8 @@ func initPubOpts(opts PublishOptions) {
 // "sync publish"
 func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 	var pResult PublishResult
-	clientID := fmt.Sprintf("%s-%d", publishPid, id)
+	sid := fmt.Sprintf("%05d", id)
+	clientID := fmt.Sprintf("%s-%s", publishPid, sid)
 	//messageID := fmt.Sprintf("%s-%d-%d", pid, id, trialNum)
 	//fmt.Printf("messageID=%s byte=%d", messageID, len(messageID))
 
@@ -39,29 +40,37 @@ func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 	//fmt.Printf("messageID=%s, len=%d", messageID, len(messageID))
 	//messageID, message := getMessageAndID(messageSize)
 	//message = fmt.Sprintf("%s/%s", messageID, message)
-	message := getMessage(messageSize)
-	fmt.Printf("message=%s, size=%d", message, len(message))
+	message := getMessage(messageSize - len(clientID) - 35 - 2) //30 => nanoTimeStamp, 2=> / /
+	//fmt.Printf("message=%s, size=%d", message, len(message))
 	//topic := fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, trialNum)
-	topic := fmt.Sprintf(baseTopic+"%d", id)
+	topic := fmt.Sprintf(baseTopic+"%s", sid)
 
 	startTime := time.Now()
-	messageID := startTime.Format(time.StampNano)
-	message = messageID + message
+	/* ここって時間かかるのかな　*/
+	//messageID := startTime.Format(time.StampNano) + " 2017"
+	messageID := startTime.Format(RFC3339NanoForMQTT)
+	message = clientID + "/" + messageID + "/" + message
+
 	//message = append(MessageID..., message...)
 	//startTime.MarshalText()
 	token := clinet.Publish(topic, qos, false, message)
 	token.Wait()
 	endTime := time.Now()
+	//time.Sleep(100 * time.Millisecond)
 
-	fmt.Printf("message=%s, size=%d", message, len(message))
+	//	fmt.Printf("message=%s, size=%d", message, len(message))
 	pResult.StartTime = startTime
 	pResult.EndTime = endTime
 	pResult.DurTime = endTime.Sub(startTime)
 	pResult.Topic = topic
 	pResult.ClientID = clientID
 	pResult.MessageID = messageID
-	fmt.Printf("### dtime=%s, clientID=%s, topic=%s ###\n",
-		pResult.DurTime, pResult.ClientID, pResult.Topic)
+	fmt.Printf("message=%s, clientID=%s, messageID=%s, topic=%s, dtime=%s\n",
+		message, clientID, messageID, topic, pResult.DurTime)
+	/*
+		fmt.Printf("### dtime=%s, clientID=%s, topic=%s ###\n",
+			pResult.DurTime, pResult.ClientID, pResult.Topic)
+	*/
 	return pResult
 }
 

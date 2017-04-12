@@ -24,8 +24,14 @@ func main() {
 
 	sRestults := pubsub.Subscribe(opts)
 	for _, sResult := range sRestults {
-		fmt.Printf("subTime=%s, topic=%s, ClienID=%s, MessageID=%s\n",
-			sResult.SubscribeTime, sResult.Topic, sResult.ClientID, sResult.MessageID)
+		/*
+				fmt.Printf("subTime=%s, topic=%s, ClienID=%s, MessageID=%s, PublisherID=%s, PublishTime=%s \n",
+					sResult.SubscribeTime, sResult.Topic, sResult.ClientID, sResult.MessageID, sResult.PublisherID, sResult.PublishTime)
+
+			fmt.Printf("RTT=%s\n", sResult.SubscribeTime.Sub(sResult.PublishTime))
+		*/
+		//fmt.Printf("publish time=%s\n", sResult.PublishTime)
+		fmt.Printf("RTT=%s\n", sResult.SubscribeTime.Sub(sResult.PublishTime))
 	}
 
 	pubsub.SyncDisconnect(opts.Clients)

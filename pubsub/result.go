@@ -8,11 +8,17 @@ import (
 
 // ConnectResult is
 type ConnectResult struct {
-	StartTime time.Time     // when trial for connect start
-	EndTime   time.Time     // when trial for connect end
-	DurTime   time.Duration // =[endtime - starttime]
-	Client    MQTT.Client   //client
-	ClientID  string        // identification times
+	//Time Stamps
+	StartTime     time.Time // when trial for connect start
+	WaitStartTime time.Time // when publish end, and wait start
+	EndTime       time.Time // when trial for connect end
+	//Durations
+	LeadDuration  time.Duration
+	WaitDuration  time.Duration
+	TotalDuration time.Duration
+	//General　info
+	Client   MQTT.Client //client
+	ClientID string      // identification times
 }
 
 // PublishResult is
@@ -32,5 +38,7 @@ type SubscribeResult struct {
 	Topic         string    //
 	ClientID      string    // 大して意味ない気がする, チェック用になるかな
 	MessageID     string    //
-	PublisherID   string    // 作ろうと思ったけど, 毎回長さが変わる可能性あるからやめた.
+
+	PublisherID string // 作ろうと思ったけど, 毎回長さが変わる可能性あるからやめた.
+	PublishTime time.Time
 }

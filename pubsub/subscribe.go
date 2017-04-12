@@ -13,18 +13,31 @@ import (
 var subscribeQos byte
 var subscribeBaseTopic string
 var subscribePid string
+var subscribeTimeZone *time.Location
+
+func initSubOpts(opts SubscribeOptions) {
+	subscribeQos = opts.Qos
+	subscribeBaseTopic = opts.Topic
+	subscribePid = strconv.FormatInt(int64(os.Getpid()), 16)
+	subscribeTimeZone, _ = time.LoadLocation("Asia/Tokyo")
+}
 
 func subscribe(client MQTT.Client, id int, ch chan SubscribeResult) {
 	//topic := fmt.Sprintf(subscribeBaseTopic+"%s"+"/"+"#", id)
-	topic := fmt.Sprintf(subscribeBaseTopic+"%d", id)
+	sid := fmt.Sprintf("%05d", id)
+	topic := fmt.Sprintf(subscribeBaseTopic+"%s", sid)
 	var handller MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 		subscribeTime := time.Now()
+		payload := msg.Payload()
 
 		var sResult SubscribeResult
 		sResult.SubscribeTime = subscribeTime
-		sResult.ClientID = fmt.Sprintf("%s-%d", subscribePid, id)
+		sResult.ClientID = fmt.Sprintf("%s-%s", subscribePid, sid)
 		sResult.Topic = msg.Topic()
-		sResult.MessageID = string(msg.Payload()[:25])
+		sResult.PublisherID = string(payload[:10])
+		sResult.MessageID = string(payload[11:46])
+		sResult.PublishTime, _ = time.Parse(RFC3339NanoForMQTT, sResult.MessageID)
+		//sResult.PublishTime, _ = time.ParseInLocation(MsgStampLayout, sResult.MessageID, subscribeTimeZone)
 		ch <- sResult
 		//messageID := msg.Payload()[:25]
 		//fmt.Printf("msg payload size= %d", len(msg.Payload()))
@@ -39,20 +52,14 @@ func subscribe(client MQTT.Client, id int, ch chan SubscribeResult) {
 
 // Subscribe is
 func Subscribe(opts SubscribeOptions) []SubscribeResult {
+	initSubOpts(opts)
+
 	var sResults []SubscribeResult
 	sResultChan := make(chan SubscribeResult)
-	//wg := &sync.WaitGroup{}
-	//wg.Add(1)
-	subscribeQos = opts.Qos
-	subscribeBaseTopic = opts.Topic
-	subscribePid = strconv.FormatInt(int64(os.Getpid()), 16)
 	for id := 0; id < opts.ClientNum; id++ {
 		client := opts.Clients[id]
 		subscribe(client, id, sResultChan)
 	}
-
-	signalchan := make(chan os.Signal, 1)
-	signal.Notify(signalchan, os.Interrupt)
 
 	go func() {
 		fmt.Printf("subscribePid=%s, exit->ctrl + c\n", subscribePid)
@@ -67,6 +74,8 @@ func Subscribe(opts SubscribeOptions) []SubscribeResult {
 		}
 	}()
 
+	signalchan := make(chan os.Signal, 1)
+	signal.Notify(signalchan, os.Interrupt)
 	<-signalchan
 	fmt.Println("get signal!!")
 	//runtime.Goexit()

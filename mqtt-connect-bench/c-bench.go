@@ -8,6 +8,8 @@ import (
 	"runtime"
 	"time"
 
+	"sort"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	pubsub "github.com/hiro-gh27/go-mqtt-bench3/pubsub"
 )
@@ -20,12 +22,61 @@ func main() {
 	runtime.GOMAXPROCS(cpus)
 
 	var clients []MQTT.Client
+	var cResults []pubsub.ConnectResult
 	opts := initOption()
 	if opts.AsyncFlag {
-		clients = pubsub.AsyncConnect(opts)
+		fmt.Println("--- AsyncMode ---")
+		cResults, clients = pubsub.AsyncConnect(opts)
 	} else {
-		clients = pubsub.SyncConnect(opts)
+		fmt.Println("--- SyncMode ---")
+		cResults, clients = pubsub.SyncConnect(opts)
 	}
+
+	sort.Sort(pubsub.SortResults(cResults))
+
+	var totalRTT time.Duration
+	var leadTotal time.Duration
+	var starts []time.Time
+	//var wStarts []time.Time
+	for _, r := range cResults {
+		/*
+			fmt.Printf("startTime=%s, waitStartTime=%s, endTime=%s\n",
+				r.StartTime, r.WaitStartTime, r.EndTime)
+		*/
+		/*
+
+			fmt.Printf("Lead=%s, wait=%s, total=%s\n",
+				r.LeadDuration, r.WaitDuration, r.TotalDuration)
+		*/
+
+		/*
+			fmt.Printf("WaitStartTime=%s, RTT=%s\n", r.WaitStartTime, r.WaitDuration)
+		*/
+		totalRTT = totalRTT + r.WaitDuration
+		leadTotal = leadTotal + r.LeadDuration
+		starts = append(starts, r.StartTime)
+		starts = append(starts, r.WaitStartTime)
+		starts = append(starts, r.EndTime)
+	}
+	/*
+		for _, t := range starts {
+			fmt.Printf("start=%s\n", t)
+		}
+	*/
+	/*
+		sort.Sort(pubsub.TimeSort(starts))
+		fmt.Printf("\n sort now \n")
+		for _, t := range starts {
+			fmt.Printf("start=%s\n", t)
+		}
+	*/
+	/*
+		d := starts[len(starts)-1].Sub(starts[0])
+		fmt.Printf("\n dur=%s スループット=%s\n", d, d/5000)
+	*/
+	//num := len(clients)
+	//fmt.Printf("Lead: total=%s RTT: total=%s, ave=%s\n", leadTotal, totalRTT, totalRTT/5000)
+
 	/*
 		同期バージョン, 非同期バージョンの戻り値をcResultにして
 		ここの位置で, Exportできるといいのではと考えている.
