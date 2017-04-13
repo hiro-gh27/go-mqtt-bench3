@@ -80,54 +80,49 @@ func SyncPublish(opts PublishOptions) []PublishResult {
 func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 	var pResults []PublishResult
 	var waitTime time.Duration
+	firstFlag := true
 	sid := fmt.Sprintf("%05d", id)
 	clientID := fmt.Sprintf("%s-%s", publishPid, sid)
 	message := getMessage(messageSize - len(clientID) - 35 - 2) //30 => nanoTimeStamp, 2=> / /
 	topic := fmt.Sprintf(baseTopic+"%s", sid)
-	if maxIntarval > 0 {
-		waitTime = RandomInterval(maxIntarval)
-	}
-	freeze.Wait()
-	if waitTime > 0 {
-		time.Sleep(waitTime)
-	}
-	startTime := time.Now()
-	messageID := startTime.Format(RFC3339NanoForMQTT)
-	message = clientID + "/" + messageID + "/" + message
-	token := client.Publish(topic, qos, false, message)
-	token.Wait()
-	endTime := time.Now()
 
-	var vals PublishResult
-	vals.StartTime = startTime
-	vals.EndTime = endTime
-	vals.DurTime = endTime.Sub(startTime)
-	vals.Topic = topic
-	vals.ClientID = clientID
-	vals.MessageID = messageID
-	pResults = append(pResults, vals)
-
-	for index := 1; index < count; index++ {
-		message := getMessage(messageSize - len(clientID) - 35 - 2) //30 => nanoTimeStamp, 2=> / /
-		if maxIntarval > 0 {
-			waitTime = RandomInterval(maxIntarval)
-			time.Sleep(waitTime)
+	for index := 0; index < count; index++ {
+		if firstFlag {
+			if maxIntarval > 0 {
+				waitTime = RandomInterval(maxIntarval)
+			}
+			freeze.Wait()
+			if waitTime > 0 {
+				time.Sleep(waitTime)
+			}
+			firstFlag = false
+		} else {
+			message = getMessage(messageSize - len(clientID) - 35 - 2) //30 => nanoTimeStamp, 2=> "//"
+			if maxIntarval > 0 {
+				waitTime = RandomInterval(maxIntarval)
+				time.Sleep(waitTime)
+			}
 		}
+
 		startTime := time.Now()
 		messageID := startTime.Format(RFC3339NanoForMQTT)
 		message = clientID + "/" + messageID + "/" + message
 		token := client.Publish(topic, qos, false, message)
+		waitStartTime := time.Now()
 		token.Wait()
 		endTime := time.Now()
 
-		vals = PublishResult{}
-		vals.StartTime = startTime
-		vals.EndTime = endTime
-		vals.DurTime = endTime.Sub(startTime)
-		vals.Topic = topic
-		vals.ClientID = clientID
-		vals.MessageID = messageID
-		pResults = append(pResults, vals)
+		var pResult PublishResult
+		pResult.StartTime = startTime
+		pResult.EndTime = endTime
+		pResult.LeadDuration = waitStartTime.Sub(startTime)
+		pResult.WaitDuration = endTime.Sub(waitStartTime)
+		pResult.TotalDuration = endTime.Sub(startTime)
+		pResult.DurTime = endTime.Sub(startTime)
+		pResult.Topic = topic
+		pResult.ClientID = clientID
+		pResult.MessageID = messageID
+		pResults = append(pResults, pResult)
 	}
 	return pResults
 }
