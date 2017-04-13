@@ -13,6 +13,8 @@ type SortResults []ConnectResult
 // TimeSort is
 type TimeSort []time.Time
 
+type pResultSort []PublishResult
+
 // sortinterface
 func (x SortResults) Len() int { return len(x) }
 func (x SortResults) Less(i, j int) bool {
@@ -32,6 +34,16 @@ func (x TimeSort) Less(i, j int) bool {
 	return dtime > 0
 }
 func (x TimeSort) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
+
+// pResultSort
+func (x pResultSort) Len() int { return len(x) }
+func (x pResultSort) Less(i, j int) bool {
+	itime := x[i].WaitStartTime
+	jtime := x[j].WaitStartTime
+	dtime := jtime.Sub(itime)
+	return dtime > 0
+}
+func (x pResultSort) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
 
 // MsgTsLayout means [Message_TimeStamp_Layout]
 const (

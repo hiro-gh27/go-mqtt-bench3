@@ -24,10 +24,10 @@ func initSubOpts(opts SubscribeOptions) {
 
 func subscribe(client MQTT.Client, id int, ch chan SubscribeResult) {
 	//topic := fmt.Sprintf(subscribeBaseTopic+"%s"+"/"+"#", id)
-	testID := 99
-	sid := fmt.Sprintf("%05d", testID)
+	//testID := 99
+	sid := fmt.Sprintf("%05d", id)
 	topic := fmt.Sprintf(subscribeBaseTopic+"%s", sid)
-	sid = fmt.Sprintf("%05d", id)
+	//sid = fmt.Sprintf("%05d", id)
 	var handller MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 		subscribeTime := time.Now()
 		payload := msg.Payload()
@@ -39,12 +39,7 @@ func subscribe(client MQTT.Client, id int, ch chan SubscribeResult) {
 		sResult.PublisherID = string(payload[:10])
 		sResult.MessageID = string(payload[11:46])
 		sResult.PublishTime, _ = time.Parse(RFC3339NanoForMQTT, sResult.MessageID)
-		//sResult.PublishTime, _ = time.ParseInLocation(MsgStampLayout, sResult.MessageID, subscribeTimeZone)
 		ch <- sResult
-		//messageID := msg.Payload()[:25]
-		//fmt.Printf("msg payload size= %d", len(msg.Payload()))
-		//fmt.Printf("ClientID=%d, topic=%s, messageID=%d\n", id, msg.Topic(), msg.MessageID())
-		//fmt.Printf("messageID=%s", string(messageID))
 	}
 	token := client.Subscribe(topic, subscribeQos, handller)
 	if token.Wait() && token.Error() != nil {
@@ -66,13 +61,7 @@ func Subscribe(opts SubscribeOptions) []SubscribeResult {
 	go func() {
 		fmt.Printf("subscribePid=%s, exit->ctrl + c\n", subscribePid)
 		for {
-			//sResult :=
-			/*
-				fmt.Printf("subTime=%s, topic=%s, ClienID=%d, MessageID=%s",
-					sResult.SubscribeTime, sResult.Topic, sResult.ClientID, sResult.MessageID)
-			*/
 			sResults = append(sResults, <-sResultChan)
-			//fmt.Println("subscribe and add informastion")
 		}
 	}()
 

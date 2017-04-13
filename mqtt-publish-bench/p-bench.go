@@ -37,7 +37,7 @@ func main() {
 			fmt.Printf("clientID=%s, start=%s, end=%s, Durtime=%s\n",
 				p.ClientID, p.StartTime, p.EndTime, p.DurTime)
 		*/
-		fmt.Printf("lead=%s, wait=%s, total=%s", p.LeadDuration, p.WaitDuration, p.TotalDuration)
+		fmt.Printf("waitstart=%s, wait=%s, total=%s\n", p.WaitStartTime, p.WaitDuration, p.TotalDuration)
 	}
 	pubsub.SyncDisconnect(opts.Clients)
 

@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"sort"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -114,6 +116,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 
 		var pResult PublishResult
 		pResult.StartTime = startTime
+		pResult.WaitStartTime = waitStartTime
 		pResult.EndTime = endTime
 		pResult.LeadDuration = waitStartTime.Sub(startTime)
 		pResult.WaitDuration = endTime.Sub(waitStartTime)
@@ -145,6 +148,8 @@ func AsyncPublish(opts PublishOptions) []PublishResult {
 	time.Sleep(3 * time.Second)
 	syncStart.Done()
 	wg.Wait()
+
+	sort.Sort(pResultSort(pResults))
 
 	return pResults
 }
