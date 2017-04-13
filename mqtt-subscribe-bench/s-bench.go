@@ -23,15 +23,9 @@ func main() {
 	opts := initOption()
 
 	sRestults := pubsub.Subscribe(opts)
-	for _, sResult := range sRestults {
-		/*
-				fmt.Printf("subTime=%s, topic=%s, ClienID=%s, MessageID=%s, PublisherID=%s, PublishTime=%s \n",
-					sResult.SubscribeTime, sResult.Topic, sResult.ClientID, sResult.MessageID, sResult.PublisherID, sResult.PublishTime)
-
-			fmt.Printf("RTT=%s\n", sResult.SubscribeTime.Sub(sResult.PublishTime))
-		*/
-		//fmt.Printf("publish time=%s\n", sResult.PublishTime)
-		fmt.Printf("RTT=%s\n", sResult.SubscribeTime.Sub(sResult.PublishTime))
+	for _, s := range sRestults {
+		fmt.Printf("ClientID=%s, pubTime=%s, subTime=%s, RTT=%s\n",
+			s.ClientID, s.PublishTime, s.SubscribeTime, s.SubscribeTime.Sub(s.PublishTime))
 	}
 
 	pubsub.SyncDisconnect(opts.Clients)
@@ -56,7 +50,7 @@ func initOption() pubsub.SubscribeOptions {
 	}
 	if broker == nil || *broker == "" || *broker == "tcp://{host}:{port}" {
 		fmt.Println("Use Default Broker= tcp://10.0.0.4:1883")
-		*broker = "tcp://10.0.0.4:1883"
+		*broker = "tcp://10.0.0.10:1883"
 	}
 	// make clients
 	connectedClients := pubsub.NomalConnect(*broker, *clients)

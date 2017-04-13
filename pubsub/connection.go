@@ -58,6 +58,9 @@ func syncconnect(id int, broker string) ConnectResult {
 	cRresult.Client = client
 	cRresult.ClientID = clientID
 
+	//fmt.Printf("disconnect")
+	//client.Disconnect(300)
+
 	fmt.Printf("ClientId=%s,Lead=%s, wait=%s, total=%s\n",
 		cRresult.ClientID, cRresult.LeadDuration, cRresult.WaitDuration, cRresult.TotalDuration)
 
@@ -121,6 +124,10 @@ func asynconnect(id int, broker string, freeze *sync.WaitGroup) ConnectResult {
 	cRresult.TotalDuration = endTime.Sub(startTime)
 	cRresult.Client = client
 	cRresult.ClientID = clientID
+
+	fmt.Printf("ClientId=%s,Lead=%s, wait=%s, total=%s\n",
+		cRresult.ClientID, cRresult.LeadDuration, cRresult.WaitDuration, cRresult.TotalDuration)
+
 	return cRresult
 }
 
@@ -156,6 +163,10 @@ func AsyncConnect(execOpts ConnectOptions) ([]ConnectResult, []MQTT.Client) {
 
 // SyncDisconnect is
 func SyncDisconnect(clinets []MQTT.Client) {
+	/*
+		試してます
+	*/
+	//os.Exit(0)
 	for _, c := range clinets {
 		c.Disconnect(250)
 	}

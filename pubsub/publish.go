@@ -33,40 +33,29 @@ func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 	var pResult PublishResult
 	sid := fmt.Sprintf("%05d", id)
 	clientID := fmt.Sprintf("%s-%s", publishPid, sid)
-	//messageID := fmt.Sprintf("%s-%d-%d", pid, id, trialNum)
-	//fmt.Printf("messageID=%s byte=%d", messageID, len(messageID))
-
-	//messageID := time.Now().Format(time.StampNano)
-	//fmt.Printf("messageID=%s, len=%d", messageID, len(messageID))
-	//messageID, message := getMessageAndID(messageSize)
-	//message = fmt.Sprintf("%s/%s", messageID, message)
 	message := getMessage(messageSize - len(clientID) - 35 - 2) //30 => nanoTimeStamp, 2=> / /
-	//fmt.Printf("message=%s, size=%d", message, len(message))
-	//topic := fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, trialNum)
 	topic := fmt.Sprintf(baseTopic+"%s", sid)
 
 	startTime := time.Now()
-	/* ここって時間かかるのかな　*/
-	//messageID := startTime.Format(time.StampNano) + " 2017"
 	messageID := startTime.Format(RFC3339NanoForMQTT)
 	message = clientID + "/" + messageID + "/" + message
-
-	//message = append(MessageID..., message...)
-	//startTime.MarshalText()
 	token := clinet.Publish(topic, qos, false, message)
+	waitStartTime := time.Now()
 	token.Wait()
 	endTime := time.Now()
 	//time.Sleep(100 * time.Millisecond)
 
-	//	fmt.Printf("message=%s, size=%d", message, len(message))
 	pResult.StartTime = startTime
+	pResult.WaitStartTime = waitStartTime
 	pResult.EndTime = endTime
+	pResult.LeadDuration = waitStartTime.Sub(startTime)
+	pResult.WaitDuration = endTime.Sub(waitStartTime)
+	pResult.TotalDuration = endTime.Sub(startTime)
 	pResult.DurTime = endTime.Sub(startTime)
 	pResult.Topic = topic
 	pResult.ClientID = clientID
 	pResult.MessageID = messageID
-	fmt.Printf("message=%s, clientID=%s, messageID=%s, topic=%s, dtime=%s\n",
-		message, clientID, messageID, topic, pResult.DurTime)
+
 	/*
 		fmt.Printf("### dtime=%s, clientID=%s, topic=%s ###\n",
 			pResult.DurTime, pResult.ClientID, pResult.Topic)
@@ -75,7 +64,7 @@ func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 }
 
 // SyncPublish is
-func SyncPublish(opts PublishOptions) {
+func SyncPublish(opts PublishOptions) []PublishResult {
 	initPubOpts(opts)
 	var pResults []PublishResult
 	for index := 0; index < opts.Count; index++ {
@@ -84,17 +73,17 @@ func SyncPublish(opts PublishOptions) {
 			pResults = append(pResults, pr)
 		}
 	}
+	return pResults
 }
 
 // "async publish""
 func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 	var pResults []PublishResult
 	var waitTime time.Duration
-
-	messageID, message := getMessageAndID(messageSize)
-	clientID := fmt.Sprintf("%s-%d", publishPid, id)
-	//topic := fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, 0)
-	topic := fmt.Sprintf(baseTopic+"%d", id)
+	sid := fmt.Sprintf("%05d", id)
+	clientID := fmt.Sprintf("%s-%s", publishPid, sid)
+	message := getMessage(messageSize - len(clientID) - 35 - 2) //30 => nanoTimeStamp, 2=> / /
+	topic := fmt.Sprintf(baseTopic+"%s", sid)
 	if maxIntarval > 0 {
 		waitTime = RandomInterval(maxIntarval)
 	}
@@ -102,37 +91,39 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 	if waitTime > 0 {
 		time.Sleep(waitTime)
 	}
-	starttime := time.Now()
+	startTime := time.Now()
+	messageID := startTime.Format(RFC3339NanoForMQTT)
+	message = clientID + "/" + messageID + "/" + message
 	token := client.Publish(topic, qos, false, message)
 	token.Wait()
 	endTime := time.Now()
 
 	var vals PublishResult
-	vals.StartTime = starttime
+	vals.StartTime = startTime
 	vals.EndTime = endTime
-	vals.DurTime = endTime.Sub(starttime)
+	vals.DurTime = endTime.Sub(startTime)
 	vals.Topic = topic
 	vals.ClientID = clientID
 	vals.MessageID = messageID
 	pResults = append(pResults, vals)
 
 	for index := 1; index < count; index++ {
-		messageID, message = getMessageAndID(messageSize)
-		//topic = fmt.Sprintf(baseTopic+"%s"+"/"+"%d", clientID, index)
-		topic := fmt.Sprintf(baseTopic+"%d", id)
+		message := getMessage(messageSize - len(clientID) - 35 - 2) //30 => nanoTimeStamp, 2=> / /
 		if maxIntarval > 0 {
 			waitTime = RandomInterval(maxIntarval)
 			time.Sleep(waitTime)
 		}
-		starttime := time.Now()
+		startTime := time.Now()
+		messageID := startTime.Format(RFC3339NanoForMQTT)
+		message = clientID + "/" + messageID + "/" + message
 		token := client.Publish(topic, qos, false, message)
 		token.Wait()
 		endTime := time.Now()
 
 		vals = PublishResult{}
-		vals.StartTime = starttime
+		vals.StartTime = startTime
 		vals.EndTime = endTime
-		vals.DurTime = endTime.Sub(starttime)
+		vals.DurTime = endTime.Sub(startTime)
 		vals.Topic = topic
 		vals.ClientID = clientID
 		vals.MessageID = messageID
@@ -142,7 +133,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 }
 
 // AsyncPublish is
-func AsyncPublish(opts PublishOptions) {
+func AsyncPublish(opts PublishOptions) []PublishResult {
 	initPubOpts(opts)
 	var pResults []PublishResult
 	wg := &sync.WaitGroup{}
@@ -159,10 +150,8 @@ func AsyncPublish(opts PublishOptions) {
 	time.Sleep(3 * time.Second)
 	syncStart.Done()
 	wg.Wait()
-	for _, vals := range pResults {
-		fmt.Printf("### dtime=%s, clientID=%s, topic=%s ###\n",
-			vals.DurTime, vals.ClientID, vals.Topic)
-	}
+
+	return pResults
 }
 
 // LoadPublish is

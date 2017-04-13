@@ -24,8 +24,10 @@ func initSubOpts(opts SubscribeOptions) {
 
 func subscribe(client MQTT.Client, id int, ch chan SubscribeResult) {
 	//topic := fmt.Sprintf(subscribeBaseTopic+"%s"+"/"+"#", id)
-	sid := fmt.Sprintf("%05d", id)
+	testID := 99
+	sid := fmt.Sprintf("%05d", testID)
 	topic := fmt.Sprintf(subscribeBaseTopic+"%s", sid)
+	sid = fmt.Sprintf("%05d", id)
 	var handller MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 		subscribeTime := time.Now()
 		payload := msg.Payload()

@@ -23,13 +23,18 @@ type ConnectResult struct {
 
 // PublishResult is
 type PublishResult struct {
-	StartTime time.Time     // when trial for connect start
-	EndTime   time.Time     // when trial for connect end
-	DurTime   time.Duration // = endtime - starttime
-	Topic     string        // = basetopic/id
-	ClientID  string        // = pid + id(index)
-	MessageID string        // = time.Stamp()
-	Message   string        // RandomMessage
+	StartTime     time.Time // when trial for connect start
+	WaitStartTime time.Time // when publish end, and wait start
+	EndTime       time.Time // when trial for connect end
+
+	LeadDuration  time.Duration
+	WaitDuration  time.Duration
+	TotalDuration time.Duration
+	DurTime       time.Duration // = endtime - starttime
+	Topic         string        // = basetopic/id
+	ClientID      string        // = pid + id(index)
+	MessageID     string        // = time.Stamp()
+	Message       string        // RandomMessage
 }
 
 // SubscribeResult is
