@@ -23,10 +23,18 @@ func main() {
 	opts := initOption()
 
 	sRestults := pubsub.Subscribe(opts)
+	var totalRTT time.Duration
 	for _, s := range sRestults {
+		RTT := s.SubscribeTime.Sub(s.PublishTime)
 		fmt.Printf("ClientID=%s, pubTime=%s, subTime=%s, RTT=%s\n",
-			s.ClientID, s.PublishTime, s.SubscribeTime, s.SubscribeTime.Sub(s.PublishTime))
+			s.ClientID, s.PublishTime, s.SubscribeTime, RTT)
+		totalRTT += RTT
 	}
+
+	subscribeNumber := float64(len(sRestults))
+	averageRTT := float64(totalRTT.Nanoseconds()) / subscribeNumber
+
+	fmt.Printf("subscribeNum=%f, totalRTT=%s, ave=%f\n", subscribeNumber, totalRTT, averageRTT)
 
 	pubsub.SyncDisconnect(opts.Clients)
 	/*

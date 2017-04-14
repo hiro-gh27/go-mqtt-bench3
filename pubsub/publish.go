@@ -97,14 +97,16 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 			if waitTime > 0 {
 				time.Sleep(waitTime)
 			}
-			fmt.Printf("interval=%s\n", waitTime)
+			//fmt.Printf("interval=%s\n", waitTime)
 			firstFlag = false
 		} else {
 			message = getMessage(messageSize - len(clientID) - 35 - 2) //30 => nanoTimeStamp, 2=> "//"
 			if maxIntarval > 0 {
 				waitTime = time.Duration(maxIntarval * 1000000)
 				waitTime = waitTime - startTimeGaps[index-1]
-				time.Sleep(waitTime)
+				if waitTime > 0 {
+					time.Sleep(waitTime)
+				}
 			}
 		}
 		startTime := time.Now()
