@@ -39,7 +39,7 @@ func subscribe(client MQTT.Client, id int, ch chan SubscribeResult) {
 		sResult.PublisherID = string(payload[:11])
 		sResult.MessageID = string(payload[12:47])
 		sResult.PublishTime, _ = time.Parse(RFC3339NanoForMQTT, sResult.MessageID)
-		fmt.Printf("publisherID=%s, get time=%s\n", sResult.PublisherID, sResult.MessageID)
+		//fmt.Printf("publisherID=%s, get time=%s\n", sResult.PublisherID, sResult.MessageID)
 		ch <- sResult
 	}
 	token := client.Subscribe(topic, subscribeQos, handller)
@@ -54,8 +54,9 @@ func Subscribe(opts SubscribeOptions) []SubscribeResult {
 
 	var sResults []SubscribeResult
 	sResultChan := make(chan SubscribeResult)
-	for id := 0; id < opts.ClientNum; id++ {
-		client := opts.Clients[id]
+	for index := 0; index < opts.ClientNum; index++ {
+		client := opts.Clients[index]
+		id := index + opts.StartID
 		subscribe(client, id, sResultChan)
 	}
 

@@ -220,6 +220,39 @@ func NomalConnect(broker string, number int) []MQTT.Client {
 		println("### Error!! ###")
 		SyncDisconnect(containClient)
 	}
+	return clients
+}
 
+// SpecificConnect is
+func SpecificConnect(broker string, number int, startID int) []MQTT.Client {
+	var clients []MQTT.Client
+	for index := 0; index < number; index++ {
+		id := index + startID
+		prosessID := strconv.FormatInt(int64(os.Getpid()), 16)
+		clientID := fmt.Sprintf("%s-%d", prosessID, id)
+		opts := MQTT.NewClientOptions()
+		opts.AddBroker(broker)
+		opts.SetClientID(clientID)
+		client := MQTT.NewClient(opts)
+
+		// connect and wait token or error
+		token := client.Connect()
+		if token.Wait() && token.Error() != nil {
+			fmt.Printf("Connected error: %s\n", token.Error())
+			client = nil
+		}
+		clients = append(clients, client)
+	}
+
+	var containClient []MQTT.Client
+	for _, c := range clients {
+		if c != nil {
+			containClient = append(containClient, c)
+		}
+	}
+	if len(containClient) < len(clients) {
+		println("### Error!! ###")
+		SyncDisconnect(containClient)
+	}
 	return clients
 }

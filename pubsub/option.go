@@ -50,8 +50,9 @@ type PublishOptions struct {
 
 // SubscribeOptions is
 type SubscribeOptions struct {
-	Qos       byte          // QoS(0|1|2)
-	Topic     string        // Topicのルート
+	Qos       byte   // QoS(0|1|2)
+	Topic     string // Topicのルート
+	StartID   int
 	ClientNum int           // クライアントの同時実行数
 	Clients   []MQTT.Client //クライアントをスライスで確保!!
 }

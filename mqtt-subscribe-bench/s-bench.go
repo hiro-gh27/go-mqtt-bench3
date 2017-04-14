@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"time"
 
+	MQTT "github.com/eclipse/paho.mqtt.golang"
 	pubsub "github.com/hiro-gh27/go-mqtt-bench3/pubsub"
 )
 
@@ -32,10 +33,12 @@ func main() {
 	}
 
 	subscribeNumber := float64(len(sRestults))
-	averageRTT := float64(totalRTT.Nanoseconds()) / subscribeNumber
+	nanoAverageRTT := float64(totalRTT.Nanoseconds()) / subscribeNumber
+	microAverageRTT := nanoAverageRTT / 1000
+	millAverageRTT := microAverageRTT / 1000
 
-	fmt.Printf("subscribeNum=%f, totalRTT=%s, ave=%f\n", subscribeNumber, totalRTT, averageRTT)
-
+	fmt.Printf("subscribeNum=%f, totalRTT=%s\n", subscribeNumber, totalRTT)
+	fmt.Printf("RTT: nano=>%fns, micro=>%fμs, nano=>%fms\n", nanoAverageRTT, microAverageRTT, millAverageRTT)
 	pubsub.SyncDisconnect(opts.Clients)
 	/*
 		export
@@ -49,6 +52,7 @@ func initOption() pubsub.SubscribeOptions {
 	// for subscribe
 	qos := flag.Int("qos", 0, "MQTT QoS(0|1|2)")
 	topic := flag.String("topic", base, "Base topic")
+	startID := flag.Int("id", 0, "startID -> N_cliensID")
 
 	flag.Parse()
 	if len(os.Args) < 0 {
@@ -61,13 +65,20 @@ func initOption() pubsub.SubscribeOptions {
 		*broker = "tcp://10.0.0.4:1883"
 	}
 	// make clients
-	connectedClients := pubsub.NomalConnect(*broker, *clients)
+
+	var connectedClients []MQTT.Client
+	if *startID > 0 {
+		connectedClients = pubsub.SpecificConnect(*broker, *clients, *startID)
+	} else {
+		connectedClients = pubsub.NomalConnect(*broker, *clients)
+	}
 
 	var options pubsub.SubscribeOptions
 	options.Qos = byte(*qos)
 	options.Topic = *topic
 	options.ClientNum = len(connectedClients)
 	options.Clients = connectedClients
+	options.StartID = *startID
 
 	return options
 }
