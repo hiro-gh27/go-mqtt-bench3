@@ -44,7 +44,6 @@ func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 	waitStartTime := time.Now()
 	token.Wait()
 	endTime := time.Now()
-	//time.Sleep(100 * time.Millisecond)
 
 	pResult.StartTime = startTime
 	pResult.WaitStartTime = waitStartTime

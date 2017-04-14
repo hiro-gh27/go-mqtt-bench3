@@ -70,12 +70,14 @@ func initOption() pubsub.PublishOptions {
 	topic := flag.String("topic", base, "Base topic")
 	count := flag.Int("count", 10, "Number of loops per client")
 	size := flag.Int("size", 1024, "Message size per publish (byte)")
-	//intervalTime := flag.Int("interval", 0, "Interval time per message (ms)")
 	asyncmode := flag.Bool("async", false, "ture mean asyncmode")
 	trial := flag.Int("trial", 1, "trial is number of how many loops are")
 	pubPerMillSecond := flag.Float64("pub/ms", 10, "publish/ms")
+	converTime := flag.Int("time", -1, "when program start")
 
 	flag.Parse()
+	//pubsub.GetExecuteTime(*converTime)
+
 	if len(os.Args) < 1 {
 		fmt.Println("### Error ###")
 		flag.Usage()

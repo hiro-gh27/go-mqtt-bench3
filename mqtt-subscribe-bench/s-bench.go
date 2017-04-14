@@ -53,6 +53,7 @@ func initOption() pubsub.SubscribeOptions {
 	qos := flag.Int("qos", 0, "MQTT QoS(0|1|2)")
 	topic := flag.String("topic", base, "Base topic")
 	startID := flag.Int("id", 0, "startID -> N_cliensID")
+	hostNum := flag.Float64("h", 1, "number of subscribe hosts")
 
 	flag.Parse()
 	if len(os.Args) < 0 {
@@ -64,7 +65,6 @@ func initOption() pubsub.SubscribeOptions {
 		fmt.Println("Use Default Broker= tcp://10.0.0.4:1883")
 		*broker = "tcp://10.0.0.4:1883"
 	}
-	// make clients
 
 	var connectedClients []MQTT.Client
 	if *startID > 0 {
@@ -76,6 +76,7 @@ func initOption() pubsub.SubscribeOptions {
 	var options pubsub.SubscribeOptions
 	options.Qos = byte(*qos)
 	options.Topic = *topic
+	options.HostNum = *hostNum
 	options.ClientNum = len(connectedClients)
 	options.Clients = connectedClients
 	options.StartID = *startID

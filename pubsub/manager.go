@@ -3,6 +3,7 @@ package pubsub
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"sort"
 	"time"
 )
@@ -153,4 +154,31 @@ func DumpConnectResults(cResults []ConnectResult) {
 
 	fmt.Printf("#### dtime= %s, clientNum=%d, duration=%dns, %dns/clinet, %f client/ms #### \n",
 		durtime, clientNum, nanoTime, perClient, throuput)
+}
+
+// GetExecuteTime is
+func GetExecuteTime(minute int) {
+	fmt.Println("ここ呼ばれてます")
+	if -1 < minute && minute < 61 {
+		//strMinute := strconv.Itoa(minute)
+		strMinute := fmt.Sprintf("%02d", minute)
+		fmt.Printf("input str is=%s\n", strMinute)
+		nowTime := time.Now().Format(time.RFC3339)
+		//byteNowTime := nowTime[:10]
+		editTime := nowTime[:14] + strMinute + ":00+09:00"
+		fmt.Println(nowTime)
+		fmt.Println(editTime)
+
+		decodeTime, _ := time.Parse(time.RFC3339, editTime)
+		t := time.Now()
+		fmt.Printf("%s\n", t)
+		fmt.Printf("%s\n", decodeTime)
+
+		timeGap := decodeTime.Sub(t)
+		fmt.Printf("gap=%s\n", timeGap)
+		gapTimer := time.NewTimer(decodeTime.Sub(time.Now()))
+		<-gapTimer.C
+		fmt.Printf("%s\n", time.Now())
+	}
+	os.Exit(0)
 }

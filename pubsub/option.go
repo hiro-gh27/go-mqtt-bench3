@@ -1,6 +1,8 @@
 package pubsub
 
 import (
+	"time"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -39,19 +41,22 @@ type PublishOptions struct {
 	Qos         byte          // QoS(0|1|2)
 	Retain      bool          // Retain
 	Topic       string        // Topicのルート
+	HostNum     float64       // publishホスト数によってスループットが変わるから.
 	ClientNum   int           // クライアントの同時実行数
 	Count       int           // 1クライアント当たりのメッセージ数
 	MessageSize int           // 1メッセージのサイズ(byte)
 	MaxInterval float64       // メッセージ毎の実行間隔時間(ms)
 	AsyncFlag   bool          //ture mean asyncmode
 	Clients     []MQTT.Client //クライアントをスライスで確保!!
-	TrialNum    int
+	TrialNum    int           //
+	ExecuteTime time.Time
 }
 
 // SubscribeOptions is
 type SubscribeOptions struct {
-	Qos       byte   // QoS(0|1|2)
-	Topic     string // Topicのルート
+	Qos       byte    // QoS(0|1|2)
+	Topic     string  // Topicのルート
+	HostNum   float64 //
 	StartID   int
 	ClientNum int           // クライアントの同時実行数
 	Clients   []MQTT.Client //クライアントをスライスで確保!!
