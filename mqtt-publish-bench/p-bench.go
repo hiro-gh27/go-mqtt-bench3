@@ -8,6 +8,8 @@ import (
 	"runtime"
 	"time"
 
+	"sort"
+
 	pubsub "github.com/hiro-gh27/go-mqtt-bench3/pubsub"
 )
 
@@ -32,13 +34,24 @@ func main() {
 		pResults = pubsub.SyncPublish(opts)
 	}
 
+	var total []time.Time
+	var DEBUG bool
 	for _, p := range pResults {
+		total = append(total, p.StartTime)
 		/*
 			fmt.Printf("clientID=%s, start=%s, end=%s, Durtime=%s\n",
 				p.ClientID, p.StartTime, p.EndTime, p.DurTime)
 		*/
-		fmt.Printf("waitstart=%s, wait=%s, total=%s\n", p.WaitStartTime, p.WaitDuration, p.TotalDuration)
+		if DEBUG {
+			fmt.Printf("waitstart=%s, wait=%s, total=%s\n",
+				p.WaitStartTime, p.WaitDuration, p.TotalDuration)
+		}
+
 	}
+	sort.Sort(pubsub.TimeSort(total))
+	totalTime := total[len(total)-1].Sub(total[0])
+	fmt.Printf("\ntotal count = %d, total=%s, nanoTime=%d, throughput=%dp/ns\n",
+		len(pResults), totalTime, totalTime.Nanoseconds(), totalTime.Nanoseconds()/int64(len(pResults)))
 	pubsub.SyncDisconnect(opts.Clients)
 
 	// export elasticseaech

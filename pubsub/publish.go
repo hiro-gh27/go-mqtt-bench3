@@ -7,8 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"sort"
-
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -25,7 +23,7 @@ func initPubOpts(opts PublishOptions) {
 	count = opts.Count
 	messageSize = opts.MessageSize
 	publishPid = strconv.FormatInt(int64(os.Getpid()), 16)
-	maxIntarval = maxInterval
+	maxIntarval = opts.MaxInterval
 	trial = opts.TrialNum
 	qos = opts.Qos
 }
@@ -80,7 +78,8 @@ func SyncPublish(opts PublishOptions) []PublishResult {
 
 // "async publish""
 func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
-	var pResults []PublishResult
+	pResults := make([]PublishResult, count)
+	startTimeGaps := make([]time.Duration, count)
 	var waitTime time.Duration
 	firstFlag := true
 	sid := fmt.Sprintf("%05d", id)
@@ -101,11 +100,11 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		} else {
 			message = getMessage(messageSize - len(clientID) - 35 - 2) //30 => nanoTimeStamp, 2=> "//"
 			if maxIntarval > 0 {
-				waitTime = RandomInterval(maxIntarval)
+				waitTime = time.Duration(maxIntarval * 1000000)
+				waitTime = waitTime - startTimeGaps[index-1]
 				time.Sleep(waitTime)
 			}
 		}
-
 		startTime := time.Now()
 		messageID := startTime.Format(RFC3339NanoForMQTT)
 		message = clientID + "/" + messageID + "/" + message
@@ -125,15 +124,31 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		pResult.Topic = topic
 		pResult.ClientID = clientID
 		pResult.MessageID = messageID
-		pResults = append(pResults, pResult)
+		pResults[index] = pResult
+
+		// 1個前の実行時間から理想的な実行時間を求める, その理想的な時間と, 今回行われた時間の差分を
+		// 次の待ち時間から減らすことで, 誤差が積み重なっていくのを避けるってゆう配慮...
+		if index > 0 {
+			idealStartTime := pResults[0].StartTime.Add(time.Duration(maxIntarval * 1000000 * index))
+			if startTime.Sub(idealStartTime) > 0 {
+				startTimeGaps[index] = startTime.Sub(idealStartTime)
+			}
+		}
 	}
 	return pResults
+
+}
+
+func periodAsync() {
+
 }
 
 // AsyncPublish is
 func AsyncPublish(opts PublishOptions) []PublishResult {
 	initPubOpts(opts)
 	var pResults []PublishResult
+	//var pResultsPoints [][]PublishResult
+	pResultPacks := make([][]PublishResult, opts.ClientNum)
 	wg := &sync.WaitGroup{}
 	syncStart := &sync.WaitGroup{}
 	syncStart.Add(1)
@@ -141,15 +156,30 @@ func AsyncPublish(opts PublishOptions) []PublishResult {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
-			re := aspub(id, opts.Clients[id], syncStart)
-			pResults = append(pResults, re...)
+			//re :=
+			pResultPacks[id] = aspub(id, opts.Clients[id], syncStart)
+			//pResultsPoints = append(pResultsPoints, aspub(id, opts.Clients[id], syncStart))
+			//pResults = append(pResults, re...)
 		}(id)
 	}
 	time.Sleep(3 * time.Second)
 	syncStart.Done()
 	wg.Wait()
 
-	sort.Sort(pResultSort(pResults))
+	fmt.Printf("pResultPacks len=%d", len(pResultPacks))
+	for _, packs := range pResultPacks {
+		for _, p := range packs {
+			pResults = append(pResults, p)
+		}
+	}
+	/*
+		sort.Sort(durationSort(tds))
+		for _, t := range tds {
+			fmt.Printf("td=%s\n", t)
+		}
+	*/
+
+	//	sort.Sort(pResultSort(pResults))
 
 	return pResults
 }

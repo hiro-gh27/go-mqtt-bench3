@@ -15,6 +15,8 @@ type TimeSort []time.Time
 
 type pResultSort []PublishResult
 
+type durationSort []time.Duration
+
 // sortinterface
 func (x SortResults) Len() int { return len(x) }
 func (x SortResults) Less(i, j int) bool {
@@ -45,6 +47,13 @@ func (x pResultSort) Less(i, j int) bool {
 }
 func (x pResultSort) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
 
+// pResultSort
+func (x durationSort) Len() int { return len(x) }
+func (x durationSort) Less(i, j int) bool {
+	return x[i] > x[j]
+}
+func (x durationSort) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
+
 // MsgTsLayout means [Message_TimeStamp_Layout]
 const (
 	MsgStampLayout     = time.StampNano + " 2006"
@@ -59,13 +68,18 @@ const (
 	letterIdxMax  = 63 / letterIdxBits
 )
 
+var tds []time.Duration
+
 // RandomInterval is return duration time for asyncMode
 func RandomInterval(max int) time.Duration {
 	var td time.Duration
-	if maxInterval > 0 {
-		interval := rand.Intn(maxInterval)
-		td = time.Duration(interval) * time.Millisecond
+	nanoMax := max * 1000000
+	if max > 0 {
+		interval := rand.Intn(nanoMax)
+		td = time.Duration(interval) * time.Nanosecond
+		tds = append(tds, td)
 	}
+	//fmt.Printf("td=%s ", td)
 	return td
 }
 
