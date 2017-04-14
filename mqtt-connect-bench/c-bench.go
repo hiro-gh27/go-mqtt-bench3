@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"runtime"
+	"strconv"
 	"time"
 
 	"sort"
@@ -24,6 +25,8 @@ func main() {
 	var clients []MQTT.Client
 	var cResults []pubsub.ConnectResult
 	opts := initOption()
+	pid := strconv.FormatInt(int64(os.Getpid()), 16)
+	fmt.Println(pid)
 	if opts.AsyncFlag {
 		fmt.Println("--- AsyncMode ---")
 		cResults, clients = pubsub.AsyncConnect(opts)

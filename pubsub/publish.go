@@ -26,6 +26,7 @@ func initPubOpts(opts PublishOptions) {
 	maxIntarval = opts.MaxInterval
 	trial = opts.TrialNum
 	qos = opts.Qos
+	fmt.Printf("pid=%s", publishPid)
 }
 
 // "sync publish"
@@ -108,6 +109,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		startTime := time.Now()
 		messageID := startTime.Format(RFC3339NanoForMQTT)
 		message = clientID + "/" + messageID + "/" + message
+		fmt.Printf("message =%s\n", clientID)
 		token := client.Publish(topic, qos, false, message)
 		waitStartTime := time.Now()
 		token.Wait()
