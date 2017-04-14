@@ -96,8 +96,9 @@ func initOption() pubsub.ConnectOptions {
 
 	broker := flag.String("broker", "tcp://{host}:{port}", "URI of MQTT broker (required)")
 	clients := flag.Int("clients", 10, "Number of clients")
-	maxinterval := flag.Int("interval", 0, "Interval time per message (ms)")
+	//maxinterval := flag.Int("interval", 0, "Interval time per message (ms)")
 	asyncmode := flag.Bool("async", false, "ture mean asyncmode")
+	connectPerMillSecond := flag.Float64("con/ms", 10, "publish/ms")
 	flag.Parse()
 
 	if len(os.Args) < 1 {
@@ -114,7 +115,7 @@ func initOption() pubsub.ConnectOptions {
 	options := pubsub.ConnectOptions{}
 	options.Broker = *broker
 	options.ClientNum = *clients
-	options.MaxInterval = *maxinterval
+	options.MaxInterval = float64(*clients) * 1 / *connectPerMillSecond
 	options.AsyncFlag = *asyncmode
 	return options
 }

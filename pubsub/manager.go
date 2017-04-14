@@ -71,9 +71,9 @@ const (
 var tds []time.Duration
 
 // RandomInterval is return duration time for asyncMode
-func RandomInterval(max int) time.Duration {
+func RandomInterval(max float64) time.Duration {
 	var td time.Duration
-	nanoMax := max * 1000000
+	nanoMax := int(max * 1000000)
 	if max > 0 {
 		interval := rand.Intn(nanoMax)
 		td = time.Duration(interval) * time.Nanosecond

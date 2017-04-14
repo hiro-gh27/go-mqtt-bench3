@@ -11,7 +11,7 @@ import (
 )
 
 var messageSize int
-var maxIntarval int
+var maxIntarval float64
 var qos byte
 var publishPid string
 var baseTopic string
@@ -97,6 +97,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 			if waitTime > 0 {
 				time.Sleep(waitTime)
 			}
+			fmt.Printf("interval=%s\n", waitTime)
 			firstFlag = false
 		} else {
 			message = getMessage(messageSize - len(clientID) - 35 - 2) //30 => nanoTimeStamp, 2=> "//"
@@ -109,7 +110,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		startTime := time.Now()
 		messageID := startTime.Format(RFC3339NanoForMQTT)
 		message = clientID + "/" + messageID + "/" + message
-		fmt.Printf("message =%s\n", clientID)
+		//fmt.Printf("message =%s\n", clientID)
 		token := client.Publish(topic, qos, false, message)
 		waitStartTime := time.Now()
 		token.Wait()
@@ -131,7 +132,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		// 1個前の実行時間から理想的な実行時間を求める, その理想的な時間と, 今回行われた時間の差分を
 		// 次の待ち時間から減らすことで, 誤差が積み重なっていくのを避けるってゆう配慮...
 		if index > 0 {
-			idealStartTime := pResults[0].StartTime.Add(time.Duration(maxIntarval * 1000000 * index))
+			idealStartTime := pResults[0].StartTime.Add(time.Duration(int(maxIntarval*1000000) * index))
 			if startTime.Sub(idealStartTime) > 0 {
 				startTimeGaps[index] = startTime.Sub(idealStartTime)
 			}

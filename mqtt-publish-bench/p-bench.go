@@ -50,8 +50,10 @@ func main() {
 	}
 	sort.Sort(pubsub.TimeSort(total))
 	totalTime := total[len(total)-1].Sub(total[0])
-	fmt.Printf("\ntotal count = %d, total=%s, nanoTime=%d, throughput=%dp/ns\n",
-		len(pResults), totalTime, totalTime.Nanoseconds(), totalTime.Nanoseconds()/int64(len(pResults)))
+	millThroughput := float64(totalTime.Nanoseconds()) / float64(len(pResults)) / 1000000
+	publishPerMillsecond := float64(1) / millThroughput
+	fmt.Printf("\ntotal count = %d, total=%s, nanoTime=%d, throughput=%fpub/ms\n",
+		len(pResults), totalTime, totalTime.Nanoseconds(), publishPerMillsecond /*totalTime.Nanoseconds()/int64(len(pResults))*/)
 	pubsub.SyncDisconnect(opts.Clients)
 
 	// export elasticseaech
@@ -68,9 +70,10 @@ func initOption() pubsub.PublishOptions {
 	topic := flag.String("topic", base, "Base topic")
 	count := flag.Int("count", 10, "Number of loops per client")
 	size := flag.Int("size", 100, "Message size per publish (byte)")
-	intervalTime := flag.Int("interval", 0, "Interval time per message (ms)")
+	//intervalTime := flag.Int("interval", 0, "Interval time per message (ms)")
 	asyncmode := flag.Bool("async", false, "ture mean asyncmode")
 	trial := flag.Int("trial", 1, "trial is number of how many loops are")
+	pubPerMillSecond := flag.Float64("pub/ms", 10, "publish/ms")
 
 	flag.Parse()
 	if len(os.Args) < 1 {
@@ -82,7 +85,7 @@ func initOption() pubsub.PublishOptions {
 		fmt.Println("Use Default Broker= tcp://10.0.0.4:1883")
 		*broker = "tcp://10.0.0.4:1883"
 	}
-	// make clients
+
 	connectedClients := pubsub.NomalConnect(*broker, *clients)
 
 	var options pubsub.PublishOptions
@@ -92,10 +95,12 @@ func initOption() pubsub.PublishOptions {
 	options.MessageSize = *size
 	options.ClientNum = len(connectedClients)
 	options.Count = *count
-	options.MaxInterval = *intervalTime
+	options.MaxInterval = float64(*clients) * 1 / *pubPerMillSecond
 	options.AsyncFlag = *asyncmode
 	options.Clients = connectedClients
 	options.TrialNum = *trial
+
+	fmt.Printf("\n max Interval=%f \n", options.MaxInterval)
 
 	return options
 }

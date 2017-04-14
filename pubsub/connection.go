@@ -10,7 +10,7 @@ import (
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
-var maxInterval int
+var maxInterval float64
 var average time.Time
 
 // MQTT.clinet=nilに対してdisconnect要求するとpanicに陥るので, 中身があるかどうかをチェックする必要がある.

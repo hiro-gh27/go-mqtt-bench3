@@ -28,10 +28,10 @@ type ExecOptions struct {
 
 // ConnectOptions is
 type ConnectOptions struct {
-	Broker      string // Broker URI
-	AsyncFlag   bool   //ture mean asyncmode
-	ClientNum   int    // クライアントの同時実行数
-	MaxInterval int    // メッセージ毎の実行間隔時間(ms)
+	Broker      string  // Broker URI
+	AsyncFlag   bool    //ture mean asyncmode
+	ClientNum   int     // クライアントの同時実行数
+	MaxInterval float64 // メッセージ毎の実行間隔時間(ms)
 }
 
 // PublishOptions is
@@ -42,7 +42,7 @@ type PublishOptions struct {
 	ClientNum   int           // クライアントの同時実行数
 	Count       int           // 1クライアント当たりのメッセージ数
 	MessageSize int           // 1メッセージのサイズ(byte)
-	MaxInterval int           // メッセージ毎の実行間隔時間(ms)
+	MaxInterval float64       // メッセージ毎の実行間隔時間(ms)
 	AsyncFlag   bool          //ture mean asyncmode
 	Clients     []MQTT.Client //クライアントをスライスで確保!!
 	TrialNum    int
