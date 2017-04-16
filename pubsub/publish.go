@@ -154,22 +154,29 @@ func AsyncPublish(opts PublishOptions) []PublishResult {
 	//var pResultsPoints [][]PublishResult
 	pResultPacks := make([][]PublishResult, opts.ClientNum)
 	wg := &sync.WaitGroup{}
-	syncStart := &sync.WaitGroup{}
-	syncStart.Add(1)
+	freeze := &sync.WaitGroup{}
+	freeze.Add(1)
 	for id := 0; id < len(opts.Clients); id++ {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
 			//re :=
-			pResultPacks[id] = aspub(id, opts.Clients[id], syncStart)
+			pResultPacks[id] = aspub(id, opts.Clients[id], freeze)
 			//pResultsPoints = append(pResultsPoints, aspub(id, opts.Clients[id], syncStart))
 			//pResults = append(pResults, re...)
 		}(id)
 	}
-	time.Sleep(3 * time.Second)
-	syncStart.Done()
-	wg.Wait()
 
+	// オプションで, 実行時間を指定している場合に同期して実行する.
+	if opts.ExecuteTime.IsZero() {
+		time.Sleep(3 * time.Second)
+	} else {
+		gapTimer := time.NewTimer(opts.ExecuteTime.Sub(time.Now()))
+		<-gapTimer.C
+	}
+	freeze.Done()
+
+	wg.Wait()
 	fmt.Printf("pResultPacks len=%d", len(pResultPacks))
 	for _, packs := range pResultPacks {
 		for _, p := range packs {

@@ -158,16 +158,16 @@ func DumpConnectResults(cResults []ConnectResult) {
 // GetExecuteTime is
 func GetExecuteTime(minute int) time.Time {
 	var decodeTime time.Time
-	if -1 < minute && minute < 61 {
+	if -1 < minute && minute < 60 {
 		strMinute := fmt.Sprintf("%02d", minute)
 		nowTime := time.Now().Format(time.RFC3339)
 		editTime := nowTime[:14] + strMinute + ":00+09:00"
 		decodeTime, _ = time.Parse(time.RFC3339, editTime)
-		/*
-			タイマーの参考になるかも↓
-			gapTimer := time.NewTimer(decodeTime.Sub(time.Now()))
-			<-gapTimer.C
-		*/
+		if decodeTime.Before(time.Now()) {
+			fmt.Printf("*** input time is before... ****\n")
+			var nilTime time.Time
+			return nilTime
+		}
 	} else {
 		fmt.Println("*** input time is out of range ***")
 	}

@@ -73,8 +73,7 @@ func initOption() pubsub.PublishOptions {
 	asyncmode := flag.Bool("async", false, "ture mean asyncmode")
 	trial := flag.Int("trial", 1, "trial is number of how many loops are")
 	pubPerMillSecond := flag.Float64("pub/ms", 10, "publish/ms")
-	converTime := flag.Int("time", -1, "when program start")
-
+	convertTime := flag.Int("time", -1, "when program start")
 	flag.Parse()
 
 	if len(os.Args) < 1 {
@@ -82,10 +81,21 @@ func initOption() pubsub.PublishOptions {
 		flag.Usage()
 		os.Exit(0)
 	}
+
 	if broker == nil || *broker == "" || *broker == "tcp://{host}:{port}" {
 		fmt.Println("Use Default Broker= tcp://10.0.0.4:1883")
 		*broker = "tcp://10.0.0.4:1883"
 	}
+
+	var executeTime time.Time
+	if *convertTime != -1 {
+		executeTime = pubsub.GetExecuteTime(*convertTime)
+		fmt.Printf("time=%s\n", executeTime)
+		if executeTime.IsZero() {
+			os.Exit(0)
+		}
+	}
+
 	connectedClients := pubsub.NomalConnect(*broker, *clients)
 
 	var options pubsub.PublishOptions
@@ -95,16 +105,11 @@ func initOption() pubsub.PublishOptions {
 	options.MessageSize = *size
 	options.ClientNum = len(connectedClients)
 	options.Count = *count
-	options.MaxInterval = float64(*clients) * 1 / *pubPerMillSecond
+	options.MaxInterval = float64(*clients) / *pubPerMillSecond
 	options.AsyncFlag = *asyncmode
 	options.Clients = connectedClients
 	options.TrialNum = *trial
-
-	if *converTime != -1 {
-		options.ExecuteTime = pubsub.GetExecuteTime(*converTime)
-	} else {
-
-	}
+	options.ExecuteTime = executeTime
 
 	fmt.Printf("\n max Interval=%f \n", options.MaxInterval)
 
