@@ -22,11 +22,13 @@ func initPubOpts(opts PublishOptions) {
 	baseTopic = opts.Topic
 	count = opts.Count
 	messageSize = opts.MessageSize
-	publishPid = strconv.FormatInt(int64(os.Getpid()), 16)
+	publishPidStr := strconv.FormatInt(int64(os.Getpid()), 16)
+	publishPid = fmt.Sprintf("%05s", publishPidStr)
+	//publishPid = strconv.FormatInt(int64(os.Getpid()), 16)
 	maxIntarval = opts.MaxInterval
 	trial = opts.TrialNum
 	qos = opts.Qos
-	fmt.Printf("pid=%s", publishPid)
+	fmt.Printf("pid=%s\n", publishPid)
 }
 
 // "sync publish"
