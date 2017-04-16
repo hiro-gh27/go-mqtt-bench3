@@ -9,6 +9,8 @@ import (
 	"sort"
 	"time"
 
+	"math"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	pubsub "github.com/hiro-gh27/go-mqtt-bench3/pubsub"
 )
@@ -72,7 +74,8 @@ func initOption() pubsub.PublishOptions {
 	size := flag.Int("size", 100, "Message size per publish (byte)")
 	asyncmode := flag.Bool("async", false, "ture mean asyncmode")
 	trial := flag.Int("trial", 1, "trial is number of how many loops are")
-	pubPerMillSecond := flag.Float64("pub/ms", 10, "publish/ms")
+	//pubPerMillSecond := flag.Float64("pub/ms", 10, "publish/ms")
+	exp2Num := flag.Float64("exp2", 0, "publish/ms")
 	convertTime := flag.Int("time", -1, "when program start")
 	startID := flag.Int("id", 0, "Number of start clientID")
 	flag.Parse()
@@ -104,6 +107,10 @@ func initOption() pubsub.PublishOptions {
 		connectedClients = pubsub.NomalConnect(*broker, *clients)
 	}
 
+	var maxInterval float64
+	thoughtput := math.Exp2(*exp2Num)
+	maxInterval = float64(*clients) / thoughtput
+
 	var options pubsub.PublishOptions
 	options.Qos = byte(*qos)
 	options.Retain = *retain
@@ -111,14 +118,15 @@ func initOption() pubsub.PublishOptions {
 	options.MessageSize = *size
 	options.ClientNum = len(connectedClients)
 	options.Count = *count
-	options.MaxInterval = float64(*clients) / *pubPerMillSecond
+	//options.MaxInterval = float64(*clients) / *pubPerMillSecond
+	options.MaxInterval = maxInterval
 	options.AsyncFlag = *asyncmode
 	options.Clients = connectedClients
 	options.TrialNum = *trial
 	options.ExecuteTime = executeTime
 	options.StartID = *startID
 
-	fmt.Printf("\n max Interval=%f \n", options.MaxInterval)
+	fmt.Printf("pubPerMillsecond=%f max Interval=%f \n", thoughtput, options.MaxInterval)
 
 	return options
 }
