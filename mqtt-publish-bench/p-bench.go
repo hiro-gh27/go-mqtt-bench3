@@ -70,7 +70,7 @@ func initOption() pubsub.PublishOptions {
 	retain := flag.Bool("retain", false, "MQTT Retain")
 	topic := flag.String("topic", base, "Base topic")
 	count := flag.Int("count", 10, "Number of loops per client")
-	size := flag.Int("size", 1024, "Message size per publish (byte)")
+	size := flag.Int("size", 100, "Message size per publish (byte)")
 	asyncmode := flag.Bool("async", false, "ture mean asyncmode")
 	trial := flag.Int("trial", 1, "trial is number of how many loops are")
 	pubPerMillSecond := flag.Float64("pub/ms", 10, "publish/ms")

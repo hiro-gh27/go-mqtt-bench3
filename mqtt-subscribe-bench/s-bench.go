@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"os/signal"
 	"runtime"
 	"time"
 
@@ -15,6 +16,14 @@ import (
 const base = "go-mqtt-bench/"
 
 func main() {
+
+	go func() {
+		signalchan := make(chan os.Signal, 1)
+		signal.Notify(signalchan, os.Interrupt)
+		<-signalchan
+		os.Exit(0)
+	}()
+
 	rand.Seed(time.Now().UnixNano())
 
 	// use max CPU's
@@ -38,7 +47,7 @@ func main() {
 	millAverageRTT := microAverageRTT / 1000
 
 	fmt.Printf("subscribeNum=%f, totalRTT=%s\n", subscribeNumber, totalRTT)
-	fmt.Printf("RTT: nano=>%fns, micro=>%fμs, nano=>%fms\n", nanoAverageRTT, microAverageRTT, millAverageRTT)
+	fmt.Printf("RTT: nano=>%fns, micro=>%fμs, mill=>%fms\n", nanoAverageRTT, microAverageRTT, millAverageRTT)
 	pubsub.SyncDisconnect(opts.Clients)
 	/*
 		export
