@@ -10,6 +10,7 @@ import (
 
 	"sort"
 
+	MQTT "github.com/eclipse/paho.mqtt.golang"
 	pubsub "github.com/hiro-gh27/go-mqtt-bench3/pubsub"
 )
 
@@ -74,6 +75,7 @@ func initOption() pubsub.PublishOptions {
 	trial := flag.Int("trial", 1, "trial is number of how many loops are")
 	pubPerMillSecond := flag.Float64("pub/ms", 10, "publish/ms")
 	convertTime := flag.Int("time", -1, "when program start")
+	startID := flag.Int("id", 0, "Number of start clientID")
 	flag.Parse()
 
 	if len(os.Args) < 1 {
@@ -96,7 +98,12 @@ func initOption() pubsub.PublishOptions {
 		}
 	}
 
-	connectedClients := pubsub.NomalConnect(*broker, *clients)
+	var connectedClients []MQTT.Client
+	if *startID > 0 {
+		connectedClients = pubsub.SpecificConnect(*broker, *clients, *startID)
+	} else {
+		connectedClients = pubsub.NomalConnect(*broker, *clients)
+	}
 
 	var options pubsub.PublishOptions
 	options.Qos = byte(*qos)
@@ -110,6 +117,7 @@ func initOption() pubsub.PublishOptions {
 	options.Clients = connectedClients
 	options.TrialNum = *trial
 	options.ExecuteTime = executeTime
+	options.StartID = *startID
 
 	fmt.Printf("\n max Interval=%f \n", options.MaxInterval)
 

@@ -151,20 +151,17 @@ func periodAsync() {
 func AsyncPublish(opts PublishOptions) []PublishResult {
 	initPubOpts(opts)
 	var pResults []PublishResult
-	//var pResultsPoints [][]PublishResult
 	pResultPacks := make([][]PublishResult, opts.ClientNum)
 	wg := &sync.WaitGroup{}
 	freeze := &sync.WaitGroup{}
 	freeze.Add(1)
-	for id := 0; id < len(opts.Clients); id++ {
+	for index := 0; index < len(opts.Clients); index++ {
 		wg.Add(1)
-		go func(id int) {
+		go func(index int) {
 			defer wg.Done()
-			//re :=
-			pResultPacks[id] = aspub(id, opts.Clients[id], freeze)
-			//pResultsPoints = append(pResultsPoints, aspub(id, opts.Clients[id], syncStart))
-			//pResults = append(pResults, re...)
-		}(id)
+			id := opts.StartID + index
+			pResultPacks[index] = aspub(id, opts.Clients[index], freeze)
+		}(index)
 	}
 
 	// オプションで, 実行時間を指定している場合に同期して実行する.

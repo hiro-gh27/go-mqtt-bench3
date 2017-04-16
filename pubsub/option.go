@@ -38,11 +38,12 @@ type ConnectOptions struct {
 
 // PublishOptions is
 type PublishOptions struct {
-	Qos         byte          // QoS(0|1|2)
-	Retain      bool          // Retain
-	Topic       string        // Topicのルート
-	HostNum     float64       // publishホスト数によってスループットが変わるから.
-	ClientNum   int           // クライアントの同時実行数
+	Qos         byte    // QoS(0|1|2)
+	Retain      bool    // Retain
+	Topic       string  // Topicのルート
+	HostNum     float64 // publishホスト数によってスループットが変わるから.
+	ClientNum   int     // クライアントの同時実行数
+	StartID     int
 	Count       int           // 1クライアント当たりのメッセージ数
 	MessageSize int           // 1メッセージのサイズ(byte)
 	MaxInterval float64       // メッセージ毎の実行間隔時間(ms)
