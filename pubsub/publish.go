@@ -173,6 +173,7 @@ func AsyncPublish(opts PublishOptions) []PublishResult {
 		gapTimer := time.NewTimer(opts.ExecuteTime.Sub(time.Now()))
 		<-gapTimer.C
 	}
+	fmt.Printf("execute time=%s", time.Now())
 	freeze.Done()
 
 	wg.Wait()

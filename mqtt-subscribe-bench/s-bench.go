@@ -17,13 +17,6 @@ const base = "go-mqtt-bench/"
 
 func main() {
 
-	go func() {
-		signalchan := make(chan os.Signal, 1)
-		signal.Notify(signalchan, os.Interrupt)
-		<-signalchan
-		os.Exit(0)
-	}()
-
 	rand.Seed(time.Now().UnixNano())
 
 	// use max CPU's
@@ -48,6 +41,15 @@ func main() {
 
 	fmt.Printf("subscribeNum=%f, totalRTT=%s\n", subscribeNumber, totalRTT)
 	fmt.Printf("RTT: nano=>%fns, micro=>%fμs, mill=>%fms\n", nanoAverageRTT, microAverageRTT, millAverageRTT)
+
+	// ブローカーがフリーズすると切断できな, 強制終了も可能にしておく.
+	go func() {
+		signalchan := make(chan os.Signal, 1)
+		signal.Notify(signalchan, os.Interrupt)
+		<-signalchan
+		os.Exit(0)
+	}()
+
 	pubsub.SyncDisconnect(opts.Clients)
 	/*
 		export
