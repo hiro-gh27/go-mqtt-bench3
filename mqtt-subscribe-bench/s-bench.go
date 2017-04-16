@@ -36,7 +36,7 @@ func main() {
 		RTT := s.SubscribeTime.Sub(s.PublishTime)
 		fmt.Printf("ClientID=%s, pubTime=%s, subTime=%s, RTT=%s\n",
 			s.ClientID, s.PublishTime, s.SubscribeTime, RTT)
-		totalRTT += RTT
+		totalRTT = totalRTT + RTT
 	}
 
 	sort.Sort(pubsub.TimeSort(allTimeStamp))
