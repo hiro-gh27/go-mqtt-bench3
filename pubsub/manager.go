@@ -3,7 +3,6 @@ package pubsub
 import (
 	"fmt"
 	"math/rand"
-	"os"
 	"sort"
 	"time"
 )
@@ -157,28 +156,20 @@ func DumpConnectResults(cResults []ConnectResult) {
 }
 
 // GetExecuteTime is
-func GetExecuteTime(minute int) {
-	fmt.Println("ここ呼ばれてます")
+func GetExecuteTime(minute int) time.Time {
+	var decodeTime time.Time
 	if -1 < minute && minute < 61 {
-		//strMinute := strconv.Itoa(minute)
 		strMinute := fmt.Sprintf("%02d", minute)
-		fmt.Printf("input str is=%s\n", strMinute)
 		nowTime := time.Now().Format(time.RFC3339)
-		//byteNowTime := nowTime[:10]
 		editTime := nowTime[:14] + strMinute + ":00+09:00"
-		fmt.Println(nowTime)
-		fmt.Println(editTime)
-
-		decodeTime, _ := time.Parse(time.RFC3339, editTime)
-		t := time.Now()
-		fmt.Printf("%s\n", t)
-		fmt.Printf("%s\n", decodeTime)
-
-		timeGap := decodeTime.Sub(t)
-		fmt.Printf("gap=%s\n", timeGap)
-		gapTimer := time.NewTimer(decodeTime.Sub(time.Now()))
-		<-gapTimer.C
-		fmt.Printf("%s\n", time.Now())
+		decodeTime, _ = time.Parse(time.RFC3339, editTime)
+		/*
+			タイマーの参考になるかも↓
+			gapTimer := time.NewTimer(decodeTime.Sub(time.Now()))
+			<-gapTimer.C
+		*/
+	} else {
+		fmt.Println("*** input time is out of range ***")
 	}
-	os.Exit(0)
+	return decodeTime
 }

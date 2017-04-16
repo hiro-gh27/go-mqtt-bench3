@@ -76,7 +76,6 @@ func initOption() pubsub.PublishOptions {
 	converTime := flag.Int("time", -1, "when program start")
 
 	flag.Parse()
-	//pubsub.GetExecuteTime(*converTime)
 
 	if len(os.Args) < 1 {
 		fmt.Println("### Error ###")
@@ -87,7 +86,6 @@ func initOption() pubsub.PublishOptions {
 		fmt.Println("Use Default Broker= tcp://10.0.0.4:1883")
 		*broker = "tcp://10.0.0.4:1883"
 	}
-
 	connectedClients := pubsub.NomalConnect(*broker, *clients)
 
 	var options pubsub.PublishOptions
@@ -101,6 +99,12 @@ func initOption() pubsub.PublishOptions {
 	options.AsyncFlag = *asyncmode
 	options.Clients = connectedClients
 	options.TrialNum = *trial
+
+	if *converTime != -1 {
+		options.ExecuteTime = pubsub.GetExecuteTime(*converTime)
+	} else {
+
+	}
 
 	fmt.Printf("\n max Interval=%f \n", options.MaxInterval)
 
