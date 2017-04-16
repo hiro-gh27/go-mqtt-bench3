@@ -133,7 +133,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		pResults[index] = pResult
 
 		if publishDebug {
-			fmt.Printf("clientID=%s, publishTime=%s\n", clientID, startTime)
+			//fmt.Printf("clientID=%s, publishTime=%s\n", clientID, startTime)
 		}
 
 		// 1個前の実行時間から理想的な実行時間を求める, その理想的な時間と, 今回行われた時間の差分を
