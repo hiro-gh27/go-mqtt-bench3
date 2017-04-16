@@ -6,9 +6,8 @@ import (
 	"math/rand"
 	"os"
 	"runtime"
-	"time"
-
 	"sort"
+	"time"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	pubsub "github.com/hiro-gh27/go-mqtt-bench3/pubsub"
@@ -54,7 +53,7 @@ func main() {
 	millThroughput := float64(totalTime.Nanoseconds()) / float64(len(pResults)) / 1000000
 	publishPerMillsecond := float64(1) / millThroughput
 	fmt.Printf("\ntotal count = %d, total=%s, nanoTime=%d, throughput=%fpub/ms\n",
-		len(pResults), totalTime, totalTime.Nanoseconds(), publishPerMillsecond /*totalTime.Nanoseconds()/int64(len(pResults))*/)
+		len(pResults), totalTime, totalTime.Nanoseconds(), publishPerMillsecond)
 	pubsub.SyncDisconnect(opts.Clients)
 
 	// export elasticseaech

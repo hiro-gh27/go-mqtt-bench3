@@ -3,11 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"os/signal"
 	"runtime"
 	"time"
+
+	"sort"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	pubsub "github.com/hiro-gh27/go-mqtt-bench3/pubsub"
@@ -27,12 +30,50 @@ func main() {
 
 	sRestults := pubsub.Subscribe(opts)
 	var totalRTT time.Duration
+	var allTimeStamp []time.Time
 	for _, s := range sRestults {
+		allTimeStamp = append(allTimeStamp, s.PublishTime, s.SubscribeTime)
 		RTT := s.SubscribeTime.Sub(s.PublishTime)
 		fmt.Printf("ClientID=%s, pubTime=%s, subTime=%s, RTT=%s\n",
 			s.ClientID, s.PublishTime, s.SubscribeTime, RTT)
 		totalRTT += RTT
 	}
+
+	sort.Sort(pubsub.TimeSort(allTimeStamp))
+	for _, t := range allTimeStamp {
+		fmt.Println(t)
+	}
+
+	pubsubDuration := allTimeStamp[len(allTimeStamp)-1].Sub(allTimeStamp[0])
+	fmt.Printf("finalSubTime=%s, firstPubTime=%s, duration=%s\n",
+		allTimeStamp[len(allTimeStamp)-1], allTimeStamp[0], pubsubDuration)
+
+	nanoPubsubDuration := float64(pubsubDuration.Nanoseconds())
+	totalClientsNum := float64(len(sRestults)) * opts.HostNum
+	//pubsubThoughtput := nanoPubsubDuration / totalClientsNum
+	fmt.Printf("totalClientNum=%f, nanoPubsubDuration=%f, pow10(6)=%f\n",
+		totalClientsNum, nanoPubsubDuration, float64(math.Pow10(6)))
+	pubsubThoughtput := totalClientsNum / (nanoPubsubDuration / float64(math.Pow10(6)))
+	fmt.Printf("thoughtput=%fps/ms\n", pubsubThoughtput)
+	/*
+		if nanoPubsubDuration < math.Pow10(3) {
+			pubsubThoughtput := totalClientsNum / nanoPubsubDuration
+			fmt.Printf("thoughtput=%fps/ns\n", pubsubThoughtput)
+		} else if nanoPubsubDuration < math.Pow10(6) {
+			pubsubThoughtput := totalClientsNum / (nanoPubsubDuration / float64(math.Pow10(3)))
+			fmt.Printf("thoughtput=%fps/μs\n", pubsubThoughtput)
+		} else if nanoPubsubDuration < math.Pow10(9) {
+			fmt.Printf("totalClientNum=%f, nanoPubsubDuration=%f, pow10(6)=%f\n",
+				totalClientsNum, nanoPubsubDuration, float64(math.Pow10(6)))
+			pubsubThoughtput := totalClientsNum / (nanoPubsubDuration / float64(math.Pow10(6)))
+			fmt.Printf("thoughtput=%fps/ms\n", pubsubThoughtput)
+		} else {
+			fmt.Printf("totalClientNum=%f, nanoPubsubDuration=%f, pow10(9)=%f\n",
+				totalClientsNum, nanoPubsubDuration, float64(math.Pow10(9)))
+			pubsubThoughtput := totalClientsNum / (nanoPubsubDuration / float64(math.Pow10(9)))
+			fmt.Printf("thoughtput=%fps/s\n", pubsubThoughtput)
+		}
+	*/
 
 	subscribeNumber := float64(len(sRestults))
 	nanoAverageRTT := float64(totalRTT.Nanoseconds()) / subscribeNumber
@@ -42,7 +83,7 @@ func main() {
 	fmt.Printf("subscribeNum=%f, totalRTT=%s\n", subscribeNumber, totalRTT)
 	fmt.Printf("RTT: nano=>%fns, micro=>%fμs, mill=>%fms\n", nanoAverageRTT, microAverageRTT, millAverageRTT)
 
-	// ブローカーがフリーズすると切断できな, 強制終了も可能にしておく.
+	// ブローカーがフリーズすると切断できない, 強制終了も可能にしておく.
 	go func() {
 		signalchan := make(chan os.Signal, 1)
 		signal.Notify(signalchan, os.Interrupt)

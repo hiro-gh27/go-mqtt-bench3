@@ -51,6 +51,8 @@ type PublishOptions struct {
 	Clients     []MQTT.Client //クライアントをスライスで確保!!
 	TrialNum    int           //
 	ExecuteTime time.Time
+
+	Debug bool
 }
 
 // SubscribeOptions is
@@ -61,6 +63,8 @@ type SubscribeOptions struct {
 	StartID   int
 	ClientNum int           // クライアントの同時実行数
 	Clients   []MQTT.Client //クライアントをスライスで確保!!
+
+	Debug bool
 }
 
 // RttOption is

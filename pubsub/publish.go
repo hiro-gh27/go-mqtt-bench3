@@ -17,6 +17,7 @@ var publishPid string
 var baseTopic string
 var trial int
 var count int
+var publishDebug = true
 
 func initPubOpts(opts PublishOptions) {
 	baseTopic = opts.Topic
@@ -113,7 +114,6 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		startTime := time.Now()
 		messageID := startTime.Format(RFC3339NanoForMQTT)
 		message = clientID + "/" + messageID + "/" + message
-		//fmt.Printf("message =%s\n", clientID)
 		token := client.Publish(topic, qos, false, message)
 		waitStartTime := time.Now()
 		token.Wait()
@@ -131,6 +131,10 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		pResult.ClientID = clientID
 		pResult.MessageID = messageID
 		pResults[index] = pResult
+
+		if publishDebug {
+			fmt.Printf("clientID=%s, publishTime=%s\n", clientID, startTime)
+		}
 
 		// 1個前の実行時間から理想的な実行時間を求める, その理想的な時間と, 今回行われた時間の差分を
 		// 次の待ち時間から減らすことで, 誤差が積み重なっていくのを避けるってゆう配慮...
@@ -173,7 +177,7 @@ func AsyncPublish(opts PublishOptions) []PublishResult {
 		gapTimer := time.NewTimer(opts.ExecuteTime.Sub(time.Now()))
 		<-gapTimer.C
 	}
-	fmt.Printf("execute time=%s", time.Now())
+	//fmt.Printf("execute time=%s", time.Now())
 	freeze.Done()
 
 	wg.Wait()
