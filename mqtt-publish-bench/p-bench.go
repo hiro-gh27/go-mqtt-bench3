@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"os/signal"
 	"runtime"
 	"sort"
 	"time"
@@ -29,36 +30,43 @@ func main() {
 	opts := initOption()
 	var pResults []pubsub.PublishResult
 	if opts.AsyncFlag {
-		fmt.Println("--- AsyncMode ---")
 		pResults = pubsub.AsyncPublish(opts)
 	} else {
 		fmt.Println("--- SyncMode ---")
 		pResults = pubsub.SyncPublish(opts)
 	}
 
-	var total []time.Time
+	fmt.Println("--- Result ---")
+	publishNum := float64(len(pResults))
 	var DEBUG bool
+	var allTimeStamps []time.Time
 	for _, p := range pResults {
-		total = append(total, p.StartTime)
-		/*
+		allTimeStamps = append(allTimeStamps, p.StartTime, p.WaitStartTime, p.EndTime)
+		if DEBUG {
 			fmt.Printf("clientID=%s, start=%s, end=%s, Durtime=%s\n",
 				p.ClientID, p.StartTime, p.EndTime, p.DurTime)
-		*/
-		if DEBUG {
 			fmt.Printf("waitstart=%s, wait=%s, total=%s\n",
 				p.WaitStartTime, p.WaitDuration, p.TotalDuration)
 		}
-
 	}
-	sort.Sort(pubsub.TimeSort(total))
-	totalTime := total[len(total)-1].Sub(total[0])
-	millThroughput := float64(totalTime.Nanoseconds()) / float64(len(pResults)) / 1000000
-	publishPerMillsecond := float64(1) / millThroughput
-	fmt.Printf("\ntotal count = %d, total=%s, nanoTime=%d, throughput=%fpub/ms\n",
-		len(pResults), totalTime, totalTime.Nanoseconds(), publishPerMillsecond)
-	pubsub.SyncDisconnect(opts.Clients)
 
-	// export elasticseaech
+	// Publish thoughtput
+	fmt.Printf("%d*%d=%dpublish\n", opts.ClientNum, opts.Count, len(pResults))
+	fmt.Println(len(allTimeStamps))
+	sort.Sort(pubsub.TimeSort(allTimeStamps))
+	allTimeDuration := allTimeStamps[len(allTimeStamps)-1].Sub(allTimeStamps[0])
+	allMillTimeDuration := float64(allTimeDuration.Nanoseconds()) / math.Pow10(6)
+	publishThoughtput := publishNum / allMillTimeDuration
+	fmt.Printf("totalDuration=%s, totalMillDuration=%fms, publishThoughtput=%fpub/ms\n",
+		allTimeDuration, allMillTimeDuration, publishThoughtput)
+
+	// brokerが配送処理中にdisconnectすると, 余計な負荷がかかると思う.
+	// なので, ctrl+cを入力されるまで待つ
+	signalchan := make(chan os.Signal, 1)
+	signal.Notify(signalchan, os.Interrupt)
+	<-signalchan
+
+	pubsub.SyncDisconnect(opts.Clients)
 }
 
 func initOption() pubsub.PublishOptions {
@@ -74,10 +82,10 @@ func initOption() pubsub.PublishOptions {
 	size := flag.Int("size", 100, "Message size per publish (byte)")
 	asyncmode := flag.Bool("async", true, "ture mean asyncmode")
 	trial := flag.Int("trial", 1, "trial is number of how many loops are")
-	//pubPerMillSecond := flag.Float64("pub/ms", 10, "publish/ms")
 	exp2Num := flag.Float64("exp2", 0, "publish/ms")
 	convertTime := flag.Int("time", -1, "when program start")
 	startID := flag.Int("id", 0, "Number of start clientID")
+	//pubPerMillSecond := flag.Float64("pub/ms", 10, "publish/ms")
 	flag.Parse()
 
 	if len(os.Args) < 1 {
@@ -87,7 +95,6 @@ func initOption() pubsub.PublishOptions {
 	}
 
 	if broker == nil || *broker == "" || *broker == "tcp://{host}:{port}" {
-		fmt.Println("Use Default Broker= tcp://10.0.0.4:1883")
 		*broker = "tcp://10.0.0.4:1883"
 	}
 
@@ -106,6 +113,8 @@ func initOption() pubsub.PublishOptions {
 	} else {
 		connectedClients = pubsub.NomalConnect(*broker, *clients)
 	}
+	// 安定させる
+	time.Sleep(3 * time.Second)
 
 	var maxInterval float64
 	thoughtput := math.Exp2(*exp2Num)
@@ -118,7 +127,6 @@ func initOption() pubsub.PublishOptions {
 	options.MessageSize = *size
 	options.ClientNum = len(connectedClients)
 	options.Count = *count
-	//options.MaxInterval = float64(*clients) / *pubPerMillSecond
 	options.MaxInterval = maxInterval
 	options.AsyncFlag = *asyncmode
 	options.Clients = connectedClients
@@ -126,7 +134,12 @@ func initOption() pubsub.PublishOptions {
 	options.ExecuteTime = executeTime
 	options.StartID = *startID
 
-	fmt.Printf("pubPerMillsecond=%f max Interval=%f \n", thoughtput, options.MaxInterval)
+	fmt.Println("--- exec info ---")
+	fmt.Printf("clientNum=%d\n", options.ClientNum)
+	fmt.Printf("count=%d\n", options.Count)
+	fmt.Printf("messsageSize=%dbyte\n", options.MessageSize)
+	fmt.Printf("thoughtput=%5fpub/ms\n", thoughtput)
+	fmt.Printf("interval=%fms\n", options.MaxInterval)
 
 	return options
 }

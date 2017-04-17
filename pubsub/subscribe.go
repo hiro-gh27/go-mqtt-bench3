@@ -59,7 +59,7 @@ func Subscribe(opts SubscribeOptions) []SubscribeResult {
 	}
 
 	go func() {
-		fmt.Printf("subscribePid=%s, exit->ctrl + c\n", subscribePid)
+		fmt.Printf("subscribePid=%s ", subscribePid)
 		for {
 			sResults = append(sResults, <-sResultChan)
 		}
@@ -68,8 +68,7 @@ func Subscribe(opts SubscribeOptions) []SubscribeResult {
 	signalchan := make(chan os.Signal, 1)
 	signal.Notify(signalchan, os.Interrupt)
 	<-signalchan
-	fmt.Println("get signal!!")
-	//runtime.Goexit()
 	close(sResultChan)
+	fmt.Println()
 	return sResults
 }

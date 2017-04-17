@@ -27,61 +27,32 @@ func main() {
 	runtime.GOMAXPROCS(cpus)
 
 	opts := initOption()
-
 	sRestults := pubsub.Subscribe(opts)
+
+	fmt.Println("--- Result ---")
 	var totalRTT time.Duration
 	var allTimeStamp []time.Time
 	for _, s := range sRestults {
 		allTimeStamp = append(allTimeStamp, s.PublishTime, s.SubscribeTime)
 		RTT := s.SubscribeTime.Sub(s.PublishTime)
-		fmt.Printf("ClientID=%s, pubTime=%s, subTime=%s, RTT=%s\n",
-			s.ClientID, s.PublishTime, s.SubscribeTime, RTT)
 		totalRTT = totalRTT + RTT
 	}
 
+	// thoughtput
 	sort.Sort(pubsub.TimeSort(allTimeStamp))
-	for _, t := range allTimeStamp {
-		fmt.Println(t)
-	}
-
 	pubsubDuration := allTimeStamp[len(allTimeStamp)-1].Sub(allTimeStamp[0])
-	fmt.Printf("finalSubTime=%s, firstPubTime=%s, duration=%s\n",
-		allTimeStamp[len(allTimeStamp)-1], allTimeStamp[0], pubsubDuration)
-
-	nanoPubsubDuration := float64(pubsubDuration.Nanoseconds())
-	totalClientsNum := float64(len(sRestults)) * opts.HostNum
-	//pubsubThoughtput := nanoPubsubDuration / totalClientsNum
-	fmt.Printf("totalClientNum=%f, nanoPubsubDuration=%f, pow10(6)=%f\n",
-		totalClientsNum, nanoPubsubDuration, float64(math.Pow10(6)))
-	pubsubThoughtput := totalClientsNum / (nanoPubsubDuration / float64(math.Pow10(6)))
+	pubsubMillDuration := float64(pubsubDuration.Nanoseconds()) / math.Pow10(6)
+	totalPubSubNum := float64(len(sRestults)) * opts.HostNum
+	fmt.Printf("subscribeNum=%f, duration=%fms\n", totalPubSubNum, pubsubMillDuration)
+	pubsubThoughtput := totalPubSubNum / pubsubMillDuration
 	fmt.Printf("thoughtput=%fps/ms\n", pubsubThoughtput)
-	/*
-		if nanoPubsubDuration < math.Pow10(3) {
-			pubsubThoughtput := totalClientsNum / nanoPubsubDuration
-			fmt.Printf("thoughtput=%fps/ns\n", pubsubThoughtput)
-		} else if nanoPubsubDuration < math.Pow10(6) {
-			pubsubThoughtput := totalClientsNum / (nanoPubsubDuration / float64(math.Pow10(3)))
-			fmt.Printf("thoughtput=%fps/μs\n", pubsubThoughtput)
-		} else if nanoPubsubDuration < math.Pow10(9) {
-			fmt.Printf("totalClientNum=%f, nanoPubsubDuration=%f, pow10(6)=%f\n",
-				totalClientsNum, nanoPubsubDuration, float64(math.Pow10(6)))
-			pubsubThoughtput := totalClientsNum / (nanoPubsubDuration / float64(math.Pow10(6)))
-			fmt.Printf("thoughtput=%fps/ms\n", pubsubThoughtput)
-		} else {
-			fmt.Printf("totalClientNum=%f, nanoPubsubDuration=%f, pow10(9)=%f\n",
-				totalClientsNum, nanoPubsubDuration, float64(math.Pow10(9)))
-			pubsubThoughtput := totalClientsNum / (nanoPubsubDuration / float64(math.Pow10(9)))
-			fmt.Printf("thoughtput=%fps/s\n", pubsubThoughtput)
-		}
-	*/
 
+	// RTT
 	subscribeNumber := float64(len(sRestults))
 	nanoAverageRTT := float64(totalRTT.Nanoseconds()) / subscribeNumber
-	microAverageRTT := nanoAverageRTT / 1000
-	millAverageRTT := microAverageRTT / 1000
-
-	fmt.Printf("subscribeNum=%f, totalRTT=%s\n", subscribeNumber, totalRTT)
-	fmt.Printf("RTT: nano=>%fns, micro=>%fμs, mill=>%fms\n", nanoAverageRTT, microAverageRTT, millAverageRTT)
+	millAverageRTT := nanoAverageRTT / math.Pow10(6)
+	fmt.Printf("subscribeNum=%f, totalRTT=%s=>%fns\n", subscribeNumber, totalRTT, nanoAverageRTT)
+	fmt.Printf("RTT: %fms\n", millAverageRTT)
 
 	// ブローカーがフリーズすると切断できない, 強制終了も可能にしておく.
 	go func() {
@@ -92,9 +63,6 @@ func main() {
 	}()
 
 	pubsub.SyncDisconnect(opts.Clients)
-	/*
-		export
-	*/
 }
 
 func initOption() pubsub.SubscribeOptions {
@@ -114,7 +82,6 @@ func initOption() pubsub.SubscribeOptions {
 		os.Exit(0)
 	}
 	if broker == nil || *broker == "" || *broker == "tcp://{host}:{port}" {
-		fmt.Println("Use Default Broker= tcp://10.0.0.4:1883")
 		*broker = "tcp://10.0.0.4:1883"
 	}
 
@@ -132,6 +99,10 @@ func initOption() pubsub.SubscribeOptions {
 	options.ClientNum = len(connectedClients)
 	options.Clients = connectedClients
 	options.StartID = *startID
+
+	fmt.Println("--- exec info ---")
+	fmt.Printf("clientsNum=%d\n", options.ClientNum)
+	fmt.Printf("qos=%b\n", options.Qos)
 
 	return options
 }

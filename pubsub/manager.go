@@ -12,9 +12,7 @@ type SortResults []ConnectResult
 
 // TimeSort is
 type TimeSort []time.Time
-
 type pResultSort []PublishResult
-
 type durationSort []time.Duration
 
 // sortinterface
@@ -86,7 +84,6 @@ func RandomInterval(max float64) time.Duration {
 func getMessageAndID(strlen int) (string, string) {
 	nanoStamp := time.Now().Format(time.StampNano)
 	strlen = strlen - len(nanoStamp)
-
 	message := make([]byte, strlen)
 	cache, remain := rand.Int63(), letterIdxMax
 	for i := strlen - 1; i >= 0; {
@@ -110,7 +107,6 @@ func getMessage(strlen int) string {
 	if strlen < 0 {
 		strlen = 1
 	}
-
 	message := make([]byte, strlen)
 	cache, remain := rand.Int63(), letterIdxMax
 	for i := strlen - 1; i >= 0; {

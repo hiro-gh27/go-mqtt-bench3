@@ -157,16 +157,11 @@ func AsyncConnect(execOpts ConnectOptions) ([]ConnectResult, []MQTT.Client) {
 		SyncDisconnect(clients)
 		os.Exit(0)
 	}
-	//DumpConnectResults(cResults)
 	return cResults, clients
 }
 
 // SyncDisconnect is
 func SyncDisconnect(clinets []MQTT.Client) {
-	/*
-		試してます
-	*/
-	//os.Exit(0)
 	for _, c := range clinets {
 		c.Disconnect(250)
 	}
@@ -185,11 +180,6 @@ func AsyncDisconnect(clients []MQTT.Client) {
 	wg.Wait()
 }
 
-// LoadConnect is
-func LoadConnect() {
-
-}
-
 // NomalConnect is don't get time stamps so use by pub or sub.
 func NomalConnect(broker string, number int) []MQTT.Client {
 	var clients []MQTT.Client
@@ -199,6 +189,7 @@ func NomalConnect(broker string, number int) []MQTT.Client {
 		opts := MQTT.NewClientOptions()
 		opts.AddBroker(broker)
 		opts.SetClientID(clientID)
+		opts.SetKeepAlive(3000 * time.Second)
 		client := MQTT.NewClient(opts)
 
 		// connect and wait token or error
@@ -233,6 +224,7 @@ func SpecificConnect(broker string, number int, startID int) []MQTT.Client {
 		opts := MQTT.NewClientOptions()
 		opts.AddBroker(broker)
 		opts.SetClientID(clientID)
+		opts.SetKeepAlive(3000 * time.Second)
 		client := MQTT.NewClient(opts)
 
 		// connect and wait token or error

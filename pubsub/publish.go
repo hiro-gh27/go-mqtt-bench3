@@ -25,11 +25,23 @@ func initPubOpts(opts PublishOptions) {
 	messageSize = opts.MessageSize
 	publishPidStr := strconv.FormatInt(int64(os.Getpid()), 16)
 	publishPid = fmt.Sprintf("%05s", publishPidStr)
-	//publishPid = strconv.FormatInt(int64(os.Getpid()), 16)
 	maxIntarval = opts.MaxInterval
 	trial = opts.TrialNum
 	qos = opts.Qos
 	fmt.Printf("pid=%s\n", publishPid)
+}
+
+// SyncPublish is
+func SyncPublish(opts PublishOptions) []PublishResult {
+	initPubOpts(opts)
+	var pResults []PublishResult
+	for index := 0; index < opts.Count; index++ {
+		for id := 0; id < len(opts.Clients); id++ {
+			pr := spub(id, opts.Clients[id], index)
+			pResults = append(pResults, pr)
+		}
+	}
+	return pResults
 }
 
 // "sync publish"
@@ -59,21 +71,39 @@ func spub(id int, clinet MQTT.Client, trialNum int) PublishResult {
 	pResult.ClientID = clientID
 	pResult.MessageID = messageID
 
-	/*
-		fmt.Printf("### dtime=%s, clientID=%s, topic=%s ###\n",
-			pResult.DurTime, pResult.ClientID, pResult.Topic)
-	*/
 	return pResult
 }
 
-// SyncPublish is
-func SyncPublish(opts PublishOptions) []PublishResult {
+// AsyncPublish is
+func AsyncPublish(opts PublishOptions) []PublishResult {
 	initPubOpts(opts)
 	var pResults []PublishResult
-	for index := 0; index < opts.Count; index++ {
-		for id := 0; id < len(opts.Clients); id++ {
-			pr := spub(id, opts.Clients[id], index)
-			pResults = append(pResults, pr)
+	pResultPacks := make([][]PublishResult, opts.ClientNum)
+	wg := &sync.WaitGroup{}
+	freeze := &sync.WaitGroup{}
+	freeze.Add(1)
+	for index := 0; index < len(opts.Clients); index++ {
+		wg.Add(1)
+		go func(index int) {
+			defer wg.Done()
+			id := opts.StartID + index
+			pResultPacks[index] = aspub(id, opts.Clients[index], freeze)
+		}(index)
+	}
+
+	// オプションで, 実行時間を指定している場合に同期して実行する.
+	if opts.ExecuteTime.IsZero() {
+		time.Sleep(3 * time.Second)
+	} else {
+		gapTimer := time.NewTimer(opts.ExecuteTime.Sub(time.Now()))
+		<-gapTimer.C
+	}
+	freeze.Done()
+
+	wg.Wait()
+	for _, packs := range pResultPacks {
+		for _, p := range packs {
+			pResults = append(pResults, p)
 		}
 	}
 	return pResults
@@ -140,7 +170,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		pResults[index] = pResult
 
 		if publishDebug {
-			fmt.Printf("clientID=%s, publishTime=%s\n", clientID, startTime)
+			//fmt.Printf("clientID=%s, publishTime=%s\n", clientID, startTime)
 		}
 
 		// 1個前の実行時間から理想的な実行時間を求める, その理想的な時間と, 今回行われた時間の差分を
@@ -153,60 +183,4 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		}
 	}
 	return pResults
-
-}
-
-func periodAsync() {
-
-}
-
-// AsyncPublish is
-func AsyncPublish(opts PublishOptions) []PublishResult {
-	initPubOpts(opts)
-	var pResults []PublishResult
-	pResultPacks := make([][]PublishResult, opts.ClientNum)
-	wg := &sync.WaitGroup{}
-	freeze := &sync.WaitGroup{}
-	freeze.Add(1)
-	for index := 0; index < len(opts.Clients); index++ {
-		wg.Add(1)
-		go func(index int) {
-			defer wg.Done()
-			id := opts.StartID + index
-			pResultPacks[index] = aspub(id, opts.Clients[index], freeze)
-		}(index)
-	}
-
-	// オプションで, 実行時間を指定している場合に同期して実行する.
-	if opts.ExecuteTime.IsZero() {
-		time.Sleep(3 * time.Second)
-	} else {
-		gapTimer := time.NewTimer(opts.ExecuteTime.Sub(time.Now()))
-		<-gapTimer.C
-	}
-	//fmt.Printf("execute time=%s", time.Now())
-	freeze.Done()
-
-	wg.Wait()
-	fmt.Printf("pResultPacks len=%d", len(pResultPacks))
-	for _, packs := range pResultPacks {
-		for _, p := range packs {
-			pResults = append(pResults, p)
-		}
-	}
-	/*
-		sort.Sort(durationSort(tds))
-		for _, t := range tds {
-			fmt.Printf("td=%s\n", t)
-		}
-	*/
-
-	//	sort.Sort(pResultSort(pResults))
-
-	return pResults
-}
-
-// LoadPublish is
-func LoadPublish() {
-
 }
