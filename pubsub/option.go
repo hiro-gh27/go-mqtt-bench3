@@ -1,8 +1,13 @@
 package pubsub
 
 import (
+	"time"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
+
+// Base is mean topic
+const Base = "go-mqtt-bench/"
 
 // ExecOptions is
 type ExecOptions struct {
@@ -25,37 +30,50 @@ type ExecOptions struct {
 
 // ConnectOptions is
 type ConnectOptions struct {
-	Broker      string // Broker URI
-	AsyncFlag   bool   //ture mean asyncmode
-	ClientNum   int    // クライアントの同時実行数
-	MaxInterval int    // メッセージ毎の実行間隔時間(ms)
+	Broker      string  // Broker URI
+	AsyncFlag   bool    //ture mean asyncmode
+	ClientNum   int     // クライアントの同時実行数
+	MaxInterval float64 // メッセージ毎の実行間隔時間(ms)
 }
 
 // PublishOptions is
 type PublishOptions struct {
-	Client             MQTT.Client
-	ID                 int
-	TrialNum           int
-	Count              int
-	ProsessID          string
-	MessageSize        int
-	MaxPublishIntarval int
-	Qos                byte
-}
-
-// PublishOptions2 is
-type PublishOptions2 struct {
-	//	Broker      string // Broker URI
-	Qos         byte          // QoS(0|1|2)
-	Retain      bool          // Retain
-	Topic       string        // Topicのルート
-	ClientNum   int           // クライアントの同時実行数
+	Qos         byte    // QoS(0|1|2)
+	Retain      bool    // Retain
+	Topic       string  // Topicのルート
+	HostNum     float64 // publishホスト数によってスループットが変わるから.
+	ClientNum   int     // クライアントの同時実行数
+	StartID     int
 	Count       int           // 1クライアント当たりのメッセージ数
 	MessageSize int           // 1メッセージのサイズ(byte)
-	MaxInterval int           // メッセージ毎の実行間隔時間(ms)
+	MaxInterval float64       // メッセージ毎の実行間隔時間(ms)
 	AsyncFlag   bool          //ture mean asyncmode
 	Clients     []MQTT.Client //クライアントをスライスで確保!!
-	TrialNum    int
+	TrialNum    int           //
+	ExecuteTime time.Time
+
+	Debug bool
+}
+
+// SubscribeOptions is
+type SubscribeOptions struct {
+	Qos       byte    // QoS(0|1|2)
+	Topic     string  // Topicのルート
+	HostNum   float64 //
+	StartID   int
+	ClientNum int           // クライアントの同時実行数
+	Clients   []MQTT.Client //クライアントをスライスで確保!!
+
+	Debug bool
+}
+
+// RttOption is
+type RttOption struct {
+	Qos         byte
+	Retain      bool   // Retain
+	Topic       string // Topicのルート
+	MessageSize int    // 1メッセージのサイズ(byte)
+	MaxInterval int    // メッセージ毎の実行間隔時間(ms)
 }
 
 // LoadOptions is
