@@ -116,7 +116,14 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		message = clientID + "/" + messageID + "/" + message
 		token := client.Publish(topic, qos, false, message)
 		waitStartTime := time.Now()
-		token.Wait()
+		if token.WaitTimeout(250) && token.Error() != nil {
+			fmt.Printf("publish error: %s\n", token.Error())
+			idealStartTime := pResults[0].StartTime.Add(time.Duration(int(maxIntarval*1000000) * index))
+			if startTime.Sub(idealStartTime) > 0 {
+				startTimeGaps[index] = startTime.Sub(idealStartTime)
+			}
+			continue
+		}
 		endTime := time.Now()
 
 		var pResult PublishResult
@@ -133,7 +140,7 @@ func aspub(id int, client MQTT.Client, freeze *sync.WaitGroup) []PublishResult {
 		pResults[index] = pResult
 
 		if publishDebug {
-			//fmt.Printf("clientID=%s, publishTime=%s\n", clientID, startTime)
+			fmt.Printf("clientID=%s, publishTime=%s\n", clientID, startTime)
 		}
 
 		// 1個前の実行時間から理想的な実行時間を求める, その理想的な時間と, 今回行われた時間の差分を
