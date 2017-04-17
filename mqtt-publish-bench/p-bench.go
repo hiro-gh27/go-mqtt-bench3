@@ -135,6 +135,7 @@ func initOption() pubsub.PublishOptions {
 	options.StartID = *startID
 
 	fmt.Println("--- exec info ---")
+	fmt.Printf("qos=%b\n", options.Qos)
 	fmt.Printf("clientNum=%d\n", options.ClientNum)
 	fmt.Printf("count=%d\n", options.Count)
 	fmt.Printf("messsageSize=%dbyte\n", options.MessageSize)

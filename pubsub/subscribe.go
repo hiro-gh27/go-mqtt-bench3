@@ -37,7 +37,7 @@ func subscribe(client MQTT.Client, id int, ch chan SubscribeResult) {
 		sResult.PublisherID = string(payload[:11])
 		sResult.MessageID = string(payload[12:47])
 		sResult.PublishTime, _ = time.Parse(RFC3339NanoForMQTT, sResult.MessageID)
-		fmt.Printf("publisherID=%s, get time=%s\n", sResult.PublisherID, sResult.SubscribeTime)
+		//fmt.Printf("publisherID=%s, get time=%s\n", sResult.PublisherID, sResult.SubscribeTime)
 		ch <- sResult
 	}
 	token := client.Subscribe(topic, subscribeQos, handller)
