@@ -56,8 +56,8 @@ func main() {
 	allTimeDuration := allTimeStamps[len(allTimeStamps)-1].Sub(allTimeStamps[0])
 	allMillTimeDuration := float64(allTimeDuration.Nanoseconds()) / math.Pow10(6)
 	publishThoughtput := publishNum / allMillTimeDuration
-	fmt.Printf("totalDuration=%s, totalMillDuration=%fms, publishThoughtput=%fpub/ms\n",
-		allTimeDuration, allMillTimeDuration, publishThoughtput)
+	fmt.Printf("totalDuration=%fms, publishThoughtput=%fpub/ms\n",
+		allMillTimeDuration, publishThoughtput)
 
 	// brokerが配送処理中にdisconnectすると, 余計な負荷がかかると思う.
 	// なので, ctrl+cを入力されるまで待つ
