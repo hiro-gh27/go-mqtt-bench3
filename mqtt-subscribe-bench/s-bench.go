@@ -64,7 +64,7 @@ func main() {
 	}
 	dispersion := (nanoDispersions / float64(len(RTTs))) / math.Pow10(12)
 	sd := math.Sqrt(dispersion)
-	fmt.Printf("Dispersion: =%fms\n SD: =%fms\n", dispersion, sd)
+	fmt.Printf("SD: =%fms\n", sd)
 
 	pubsub.SyncDisconnect(opts.Clients)
 }
