@@ -52,7 +52,6 @@ func main() {
 
 	// Publish thoughtput
 	fmt.Printf("%d*%d=%dpublish\n", opts.ClientNum, opts.Count, len(pResults))
-	fmt.Println(len(allTimeStamps))
 	sort.Sort(pubsub.TimeSort(allTimeStamps))
 	allTimeDuration := allTimeStamps[len(allTimeStamps)-1].Sub(allTimeStamps[0])
 	allMillTimeDuration := float64(allTimeDuration.Nanoseconds()) / math.Pow10(6)
