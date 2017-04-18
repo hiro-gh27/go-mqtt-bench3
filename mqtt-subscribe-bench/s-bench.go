@@ -63,7 +63,7 @@ func main() {
 		nanoDispersions = nanoDispersions + nanoDispersion
 		fmt.Printf("RTT=%s, nanoDispersion=%fns\n", RTT, nanoDispersion)
 	}
-	dispersion := (nanoDispersions / float64(len(RTTs))) / math.Pow10(6)
+	dispersion := (nanoDispersions / float64(len(RTTs))) / math.Pow10(12)
 	sd := math.Sqrt(dispersion)
 
 	fmt.Printf("dispersion: =%f\nmssd: =%fms\n", dispersion, sd)
