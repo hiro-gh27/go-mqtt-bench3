@@ -41,6 +41,7 @@ func main() {
 
 	// thoughtput
 	sort.Sort(pubsub.TimeSort(allTimeStamp))
+	sort.Sort(pubsub.DurationSort(RTTs))
 	pubsubDuration := allTimeStamp[len(allTimeStamp)-1].Sub(allTimeStamp[0])
 	pubsubMillDuration := float64(pubsubDuration.Nanoseconds()) / math.Pow10(6)
 	totalPubSubNum := float64(len(sRestults)) * opts.HostNum
@@ -53,7 +54,7 @@ func main() {
 	nanoAverageRTT := float64(totalRTT.Nanoseconds()) / subscribeNumber
 	millAverageRTT := nanoAverageRTT / math.Pow10(6)
 	fmt.Printf("subscribeNum=%f, totalRTT=%fns\n", subscribeNumber, nanoAverageRTT)
-	fmt.Printf("RTT: %fms\n", millAverageRTT)
+	fmt.Printf("RTT: %fms(min=%s, max=%s)\n", millAverageRTT, RTTs[len(RTTs)-1], RTTs[0])
 
 	// SD
 	var nanoDispersions float64
