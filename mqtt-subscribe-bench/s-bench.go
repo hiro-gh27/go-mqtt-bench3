@@ -6,7 +6,6 @@ import (
 	"math"
 	"math/rand"
 	"os"
-	"os/signal"
 	"runtime"
 	"time"
 
@@ -61,20 +60,11 @@ func main() {
 	for _, RTT := range RTTs {
 		nanoDispersion := (nanoAverageRTT - float64(RTT.Nanoseconds())) * (nanoAverageRTT - float64(RTT.Nanoseconds()))
 		nanoDispersions = nanoDispersions + nanoDispersion
-		fmt.Printf("RTT=%s, nanoDispersion=%fns\n", RTT, nanoDispersion)
+		//fmt.Printf("RTT=%s, nanoDispersion=%fns\n", RTT, nanoDispersion)
 	}
 	dispersion := (nanoDispersions / float64(len(RTTs))) / math.Pow10(12)
 	sd := math.Sqrt(dispersion)
-
-	fmt.Printf("dispersion: =%f\nmssd: =%fms\n", dispersion, sd)
-
-	// ブローカーがフリーズすると切断できない, 強制終了も可能にしておく.
-	go func() {
-		signalchan := make(chan os.Signal, 1)
-		signal.Notify(signalchan, os.Interrupt)
-		<-signalchan
-		os.Exit(0)
-	}()
+	fmt.Printf("Dispersion: =%fms\n SD: =%fms\n", dispersion, sd)
 
 	pubsub.SyncDisconnect(opts.Clients)
 }
