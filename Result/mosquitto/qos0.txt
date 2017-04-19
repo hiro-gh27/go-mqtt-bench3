@@ -1,0 +1,362 @@
+### exp2=-6 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=-6
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=0.015625pub/ms
+interval=6400.000000ms
+pid=00c9f
+--- Result ---
+100*100=10000publish
+totalDuration=639958.671927ms, publishThoughtput=0.015626pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=00c96 ^C
+--- Result ---
+subscribeNum=10000.000000, duration=639959.589976ms
+Thoughtput: 0.015626ps/ms
+subscribeNum=10000.000000, totalRTT=1139283.800800ns
+RTT: 1.139284ms(min=744.697µs, max=2.893836ms)
+SD: =0.150159ms
+
+
+
+### exp2=-5 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=-5
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=0.031250pub/ms
+interval=3200.000000ms
+pid=01192
+--- Result ---
+100*100=10000publish
+totalDuration=319954.673397ms, publishThoughtput=0.031254pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=01189 ^C
+--- Result ---
+subscribeNum=10000.000000, duration=319955.681195ms
+Thoughtput: 0.031254ps/ms
+subscribeNum=10000.000000, totalRTT=1172554.409000ns
+RTT: 1.172554ms(min=602.535µs, max=9.194779ms)
+SD: =0.233773ms
+
+
+
+### exp2=-4 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=-4
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=0.062500pub/ms
+interval=1600.000000ms
+pid=011fc
+--- Result ---
+100*100=10000publish
+totalDuration=159987.649150ms, publishThoughtput=0.062505pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=011f3 ^C
+--- Result ---
+subscribeNum=10000.000000, duration=159988.604443ms
+Thoughtput: 0.062504ps/ms
+subscribeNum=10000.000000, totalRTT=1187935.843800ns
+RTT: 1.187936ms(min=659.419µs, max=5.729934ms)
+SD: =0.233188ms
+
+
+
+### exp2=-3 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=-3
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=0.125000pub/ms
+interval=800.000000ms
+pid=0121c
+--- Result ---
+100*100=10000publish
+totalDuration=79995.628567ms, publishThoughtput=0.125007pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=01213 ^C
+--- Result ---
+subscribeNum=10000.000000, duration=79996.523992ms
+Thoughtput: 0.125005ps/ms
+subscribeNum=10000.000000, totalRTT=1146739.193300ns
+RTT: 1.146739ms(min=622.705µs, max=6.777622ms)
+SD: =0.292928ms
+
+
+
+### exp2=-2 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=-2
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=0.250000pub/ms
+interval=400.000000ms
+pid=01242
+--- Result ---
+100*100=10000publish
+totalDuration=40000.179984ms, publishThoughtput=0.249999pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=01239 ^C
+--- Result ---
+subscribeNum=10000.000000, duration=40001.448626ms
+Thoughtput: 0.249991ps/ms
+subscribeNum=10000.000000, totalRTT=1234703.746100ns
+RTT: 1.234704ms(min=573µs, max=11.381793ms)
+SD: =0.404008ms
+
+
+
+### exp2=-1 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=-1
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=0.500000pub/ms
+interval=200.000000ms
+pid=0125b
+--- Result ---
+100*100=10000publish
+totalDuration=19996.710055ms, publishThoughtput=0.500082pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=01252 ^C
+--- Result ---
+subscribeNum=10000.000000, duration=19997.695899ms
+Thoughtput: 0.500058ps/ms
+subscribeNum=10000.000000, totalRTT=1121584.948400ns
+RTT: 1.121585ms(min=558.083µs, max=19.108483ms)
+SD: =0.576663ms
+
+
+
+### exp2=0 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=0
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=1.000000pub/ms
+interval=100.000000ms
+pid=012b7
+--- Result ---
+100*100=10000publish
+totalDuration=9999.201008ms, publishThoughtput=1.000080pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=012ae ^C
+--- Result ---
+subscribeNum=10000.000000, duration=9999.819921ms
+Thoughtput: 1.000018ps/ms
+subscribeNum=10000.000000, totalRTT=765817.560700ns
+RTT: 0.765818ms(min=373.919µs, max=8.667696ms)
+SD: =0.251624ms
+
+
+
+### exp2=1 ###
+
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=1
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=2.000000pub/ms
+interval=50.000000ms
+pid=0136e
+--- Result ---
+100*100=10000publish
+totalDuration=4999.385135ms, publishThoughtput=2.000246pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=01365 ^C
+--- Result ---
+subscribeNum=10000.000000, duration=4999.962212ms
+Thoughtput: 2.000015ps/ms
+subscribeNum=10000.000000, totalRTT=642980.818800ns
+RTT: 0.642981ms(min=329.143µs, max=2.35943ms)
+SD: =0.139713ms
+
+
+
+### exp2=2 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=2
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=4.000000pub/ms
+interval=25.000000ms
+pid=01380
+--- Result ---
+100*100=10000publish
+totalDuration=2499.846502ms, publishThoughtput=4.000246pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=01377 ^C
+--- Result ---
+subscribeNum=10000.000000, duration=2500.966327ms
+Thoughtput: 3.998454ps/ms
+subscribeNum=10000.000000, totalRTT=1155987.206400ns
+RTT: 1.155987ms(min=322.734µs, max=11.650299ms)
+SD: =1.126641ms
+
+
+
+### exp2=3 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=3
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=8.000000pub/ms
+interval=12.500000ms
+pid=013a6
+--- Result ---
+100*100=10000publish
+totalDuration=1249.685942ms, publishThoughtput=8.002010pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=0139d ^C
+--- Result ---
+subscribeNum=10000.000000, duration=1250.460757ms
+Thoughtput: 7.997052ps/ms
+subscribeNum=10000.000000, totalRTT=1298843.471700ns
+RTT: 1.298843ms(min=377.455µs, max=8.477278ms)
+SD: =1.185523ms
+
+### exp2=4 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=4
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=16.000000pub/ms
+interval=6.250000ms
+pid=013b8
+--- Result ---
+100*100=10000publish
+totalDuration=624.814572ms, publishThoughtput=16.004748pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=013af ^C
+--- Result ---
+subscribeNum=10000.000000, duration=633.642078ms
+Thoughtput: 15.781780ps/ms
+subscribeNum=10000.000000, totalRTT=21018721.956600ns
+RTT: 21.018722ms(min=1.206358ms, max=76.027983ms)
+SD: =13.769212ms
+
+
+
+### exp2=5 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=5
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=32.000000pub/ms
+interval=3.125000ms
+pid=01471
+--- Result ---
+100*100=10000publish
+totalDuration=312.570597ms, publishThoughtput=31.992772pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=01468 ^C
+--- Result ---
+subscribeNum=10000.000000, duration=551.725277ms
+Thoughtput: 18.124963ps/ms
+subscribeNum=10000.000000, totalRTT=244045856.314100ns
+RTT: 244.045856ms(min=2.229847ms, max=353.239045ms)
+SD: =43.717790ms
+
+
+
+### exp2=6 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=6
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=64.000000pub/ms
+interval=1.562500ms
+pid=014bc
+--- Result ---
+100*100=10000publish
+totalDuration=156.246744ms, publishThoughtput=64.001334pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=014b3 ^C
+--- Result ---
+subscribeNum=10000.000000, duration=556.068213ms
+Thoughtput: 17.983405ps/ms
+subscribeNum=10000.000000, totalRTT=293717196.060000ns
+RTT: 293.717196ms(min=2.305622ms, max=403.427106ms)
+SD: =64.304396ms
+
+#########

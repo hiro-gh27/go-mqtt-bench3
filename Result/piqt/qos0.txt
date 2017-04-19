@@ -1,0 +1,49 @@
+### exp2=-6 ###
+akimac16:mqtt-publish-bench hiroki$ go run p-bench.go -clients=100 -count=100 -exp2=-6
+--- exec info ---
+qos=0
+clientNum=100
+count=100
+messsageSize=100byte
+thoughtput=0.015625pub/ms
+interval=6400.000000ms
+pid=010ee
+--- Result ---
+100*100=10000publish
+totalDuration=639830.038769ms, publishThoughtput=0.015629pub/ms
+
+akimac16:mqtt-subscribe-bench hiroki$ go run s-bench.go -clients=100
+--- exec info ---
+clientsNum=100
+qos=0
+subscribePid=01087 ^C  
+--- Result ---
+subscribeNum=10000.000000, duration=1113189.357821ms
+Thoughtput: 0.008983ps/ms
+subscribeNum=10000.000000, totalRTT=399147316169.529297ns
+RTT: 399147.316170ms(min=390.554912ms, max=14m51.749406867s)
+SD: =218642.531810ms
+
+### exp2=-5 ###
+
+### exp2=-4 ###
+
+### exp2=-3 ###
+
+### exp2=-2 ###
+
+### exp2=-1 ###
+
+### exp2=0 ###
+
+### exp2=1 ###
+
+### exp2=2 ###
+
+### exp2=3 ###
+
+### exp2=4 ###
+
+### exp2=5 ###
+
+### exp2=6 ###
