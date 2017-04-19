@@ -52,13 +52,12 @@ func main() {
 
 	// Publish thoughtput
 	fmt.Printf("%d*%d=%dpublish\n", opts.ClientNum, opts.Count, len(pResults))
-	fmt.Println(len(allTimeStamps))
 	sort.Sort(pubsub.TimeSort(allTimeStamps))
 	allTimeDuration := allTimeStamps[len(allTimeStamps)-1].Sub(allTimeStamps[0])
 	allMillTimeDuration := float64(allTimeDuration.Nanoseconds()) / math.Pow10(6)
 	publishThoughtput := publishNum / allMillTimeDuration
-	fmt.Printf("totalDuration=%s, totalMillDuration=%fms, publishThoughtput=%fpub/ms\n",
-		allTimeDuration, allMillTimeDuration, publishThoughtput)
+	fmt.Printf("totalDuration=%fms, publishThoughtput=%fpub/ms\n",
+		allMillTimeDuration, publishThoughtput)
 
 	// brokerが配送処理中にdisconnectすると, 余計な負荷がかかると思う.
 	// なので, ctrl+cを入力されるまで待つ
@@ -135,6 +134,7 @@ func initOption() pubsub.PublishOptions {
 	options.StartID = *startID
 
 	fmt.Println("--- exec info ---")
+	fmt.Printf("qos=%b\n", options.Qos)
 	fmt.Printf("clientNum=%d\n", options.ClientNum)
 	fmt.Printf("count=%d\n", options.Count)
 	fmt.Printf("messsageSize=%dbyte\n", options.MessageSize)

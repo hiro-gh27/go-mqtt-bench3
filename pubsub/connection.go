@@ -163,7 +163,7 @@ func AsyncConnect(execOpts ConnectOptions) ([]ConnectResult, []MQTT.Client) {
 // SyncDisconnect is
 func SyncDisconnect(clinets []MQTT.Client) {
 	for _, c := range clinets {
-		c.Disconnect(250)
+		c.Disconnect(500)
 	}
 }
 

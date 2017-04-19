@@ -6,7 +6,6 @@ import (
 	"math"
 	"math/rand"
 	"os"
-	"os/signal"
 	"runtime"
 	"time"
 
@@ -30,37 +29,43 @@ func main() {
 	sRestults := pubsub.Subscribe(opts)
 
 	fmt.Println("--- Result ---")
+	var RTTs []time.Duration
 	var totalRTT time.Duration
 	var allTimeStamp []time.Time
 	for _, s := range sRestults {
 		allTimeStamp = append(allTimeStamp, s.PublishTime, s.SubscribeTime)
 		RTT := s.SubscribeTime.Sub(s.PublishTime)
+		RTTs = append(RTTs, RTT)
 		totalRTT = totalRTT + RTT
 	}
 
 	// thoughtput
 	sort.Sort(pubsub.TimeSort(allTimeStamp))
+	sort.Sort(pubsub.DurationSort(RTTs))
 	pubsubDuration := allTimeStamp[len(allTimeStamp)-1].Sub(allTimeStamp[0])
 	pubsubMillDuration := float64(pubsubDuration.Nanoseconds()) / math.Pow10(6)
 	totalPubSubNum := float64(len(sRestults)) * opts.HostNum
 	fmt.Printf("subscribeNum=%f, duration=%fms\n", totalPubSubNum, pubsubMillDuration)
 	pubsubThoughtput := totalPubSubNum / pubsubMillDuration
-	fmt.Printf("thoughtput=%fps/ms\n", pubsubThoughtput)
+	fmt.Printf("Thoughtput: %fps/ms\n", pubsubThoughtput)
 
 	// RTT
 	subscribeNumber := float64(len(sRestults))
 	nanoAverageRTT := float64(totalRTT.Nanoseconds()) / subscribeNumber
 	millAverageRTT := nanoAverageRTT / math.Pow10(6)
-	fmt.Printf("subscribeNum=%f, totalRTT=%s=>%fns\n", subscribeNumber, totalRTT, nanoAverageRTT)
-	fmt.Printf("RTT: %fms\n", millAverageRTT)
+	fmt.Printf("subscribeNum=%f, totalRTT=%fns\n", subscribeNumber, nanoAverageRTT)
+	fmt.Printf("RTT: %fms(min=%s, max=%s)\n", millAverageRTT, RTTs[len(RTTs)-1], RTTs[0])
 
-	// ブローカーがフリーズすると切断できない, 強制終了も可能にしておく.
-	go func() {
-		signalchan := make(chan os.Signal, 1)
-		signal.Notify(signalchan, os.Interrupt)
-		<-signalchan
-		os.Exit(0)
-	}()
+	// SD
+	var nanoDispersions float64
+	for _, RTT := range RTTs {
+		nanoDispersion := (nanoAverageRTT - float64(RTT.Nanoseconds())) * (nanoAverageRTT - float64(RTT.Nanoseconds()))
+		nanoDispersions = nanoDispersions + nanoDispersion
+		//fmt.Printf("RTT=%s, nanoDispersion=%fns\n", RTT, nanoDispersion)
+	}
+	dispersion := (nanoDispersions / float64(len(RTTs))) / math.Pow10(12)
+	sd := math.Sqrt(dispersion)
+	fmt.Printf("SD: =%fms\n", sd)
 
 	pubsub.SyncDisconnect(opts.Clients)
 }
